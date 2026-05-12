@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GlobalSearch } from "@/components/shared/global-search";
 
 const STAGES = [
   { num: "01", slug: "identify",     label: "Identify" },
@@ -24,8 +25,8 @@ export function StripNav() {
   const pathname = usePathname() ?? "/";
 
   return (
-    <header className="border-b border-rule bg-paper py-3.5 sm:py-[18px]">
-      <div className="mx-auto flex max-w-[1100px] flex-col items-stretch gap-3 px-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8 sm:px-7">
+    <header className="border-b border-rule bg-paper">
+      <div className="mx-auto flex max-w-[1100px] flex-col items-stretch gap-3 px-5 py-3.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8 sm:px-7 sm:py-[18px]">
         <div className="flex items-baseline justify-between gap-4">
           <Link
             href="/"
@@ -73,6 +74,12 @@ export function StripNav() {
         >
           systemslibrarian.dev
         </a>
+      </div>
+
+      <div className="border-t border-paper-edge bg-paper-deep">
+        <div className="mx-auto max-w-[1100px] px-5 py-2.5 sm:px-7">
+          <GlobalSearch />
+        </div>
       </div>
     </header>
   );

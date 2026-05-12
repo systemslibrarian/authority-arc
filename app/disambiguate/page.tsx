@@ -16,8 +16,13 @@ export const metadata: Metadata = {
     "Stage 2 of the Authority Arc — when two records look alike, decide whether they describe the same person. When they look different, decide whether they still might. Taught with live VIAF AutoSuggest and two curated cases.",
 };
 
-export default function DisambiguatePage() {
+export default function DisambiguatePage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
   const cases = listDisambiguationCases();
+  const seedQuery = (searchParams?.q ?? "stephen king").trim() || "stephen king";
   return (
     <StagePage
       num="02"
@@ -99,7 +104,7 @@ export default function DisambiguatePage() {
           </>
         }
       >
-        <AutoSuggest />
+        <AutoSuggest initial={seedQuery} />
         <p className="mt-3 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
           <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-[#b8d4a8]" />
           <span>Live · VIAF AutoSuggest API</span>
