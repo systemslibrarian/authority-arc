@@ -1,0 +1,84 @@
+{
+  "id": "king-ledger",
+  "entity": {
+    "name": "Stephen King",
+    "viaf": "27066711",
+    "lc": "n79018049",
+    "established": "1979"
+  },
+  "entries": [
+    {
+      "year": "1979",
+      "type": "created",
+      "actor": "Library of Congress / NACO",
+      "title": "Authority record established",
+      "detail": "LC creates an authority record for Stephen King with the heading 'King, Stephen, 1947-'. The 670 source-citation field references the title page of Carrie (1974) and contemporary biographical material. The record is one paragraph long and has no cross-references yet.",
+      "significance": "This is the founding moment of an identity in the catalog. Until this record exists, every library that catalogs a King novel makes a local guess at how to spell and shape his name. Once it exists, every library can crosswalk against it."
+    },
+    {
+      "year": "1985",
+      "type": "linked",
+      "actor": "Library of Congress / NACO",
+      "title": "Pseudonym linked: Richard Bachman",
+      "detail": "After King publicly acknowledges that 'Richard Bachman' is his pen name (February 1985), the LC record adds a 500 see-also field pointing at the separately maintained Bachman record (n79141890). The Bachman record is left intact — pseudonymous works continue to be catalogued under that name, with the see-also serving as the bridge.",
+      "significance": "Authority systems generally do not destroy the original record when a pseudonym is linked. Two records, one person, with a bridge — preserving the access points so existing citations still resolve while the new evidence is folded in."
+    },
+    {
+      "year": "1992",
+      "type": "added-source",
+      "actor": "Deutsche Nationalbibliothek (DNB)",
+      "title": "Independent DNB record",
+      "detail": "DNB establishes its own authority record (118562525) for King, with a German-language preferred form. The LC record is unaware of the DNB record yet — there is no crosswalking infrastructure between the two national authorities at this point. Each catalog is internally consistent and externally siloed.",
+      "significance": "This is the state of the world before VIAF. National authorities maintain parallel records, sometimes with subtly different metadata, with no automatic mechanism for keeping them in agreement."
+    },
+    {
+      "year": "2003",
+      "type": "merged",
+      "actor": "VIAF (OCLC + national authorities)",
+      "title": "VIAF cluster formed",
+      "detail": "VIAF launches in 2003 as a joint OCLC / national authority project. King's LC, DNB, BNF, and BNE records are clustered into a single VIAF identity (27066711) on the basis of matching name forms and life dates. The cluster URI becomes the persistent meta-identifier that survives any one source authority going dark.",
+      "significance": "The merge is the structural fix to the 1992 problem. Each national authority still owns its record, but VIAF maintains the mapping. When LC corrects a typo, VIAF observes the change and propagates it to consumers. This is the layer modern identity-resolution systems are usually trying to rebuild from scratch."
+    },
+    {
+      "year": "2009",
+      "type": "added-source",
+      "actor": "VIAF",
+      "title": "ISNI cross-reference added",
+      "detail": "The newly-issued ISNI (International Standard Name Identifier) 0000 0001 2103 2683 is folded into the King cluster as another source. ISNI's mandate overlaps with VIAF's but its scope is broader (rights-holders, performers, corporations); the cluster now spans both spheres.",
+      "significance": "Identity systems accumulate their cross-references over time. The cluster does not grow because King's identity changed; it grows because more institutions found themselves needing to point at it."
+    },
+    {
+      "year": "2012",
+      "type": "added-source",
+      "actor": "Wikidata",
+      "title": "Wikidata item Q39829 created",
+      "detail": "Wikidata launches in October 2012 and quickly accumulates items for canonical figures. Q39829 is created for King; one of its earliest edges is the VIAF cluster ID. The relationship is asymmetric — Wikidata is now consuming the VIAF mapping rather than VIAF tracking Wikidata.",
+      "significance": "Modern knowledge-graph platforms generally do not establish authority — they consume it. VIAF, ISNI, LC, and the national authorities remain the source of truth; Wikidata and its peers are downstream views."
+    },
+    {
+      "year": "2016",
+      "type": "normalized",
+      "actor": "Library of Congress / NACO",
+      "title": "Name form review — heading retained",
+      "detail": "Periodic name-authority review at LC re-examines the King record under the contemporary NACO descriptive cataloging rules. The preferred heading is retained as 'King, Stephen, 1947-'; alternative forms in non-Latin scripts are added as 400-field cross-references to support transliterated access from Russian, Korean, and Japanese catalogs.",
+      "significance": "Maintenance does not always change the visible record. Often the work is to make a name accessible from new directions — a transliteration variant added, a diacritic normalized — without disturbing the established access points."
+    },
+    {
+      "year": "2018",
+      "type": "corrected",
+      "actor": "VIAF",
+      "title": "Disambiguation against same-name author",
+      "detail": "An academic also named 'Stephen King' (no relation, b. 1955, education researcher) is added to the catalog. VIAF assigns a separate cluster (a different VIAF id) and adds 'see also' cross-references between the two clusters to help future catalogers avoid conflating them.",
+      "significance": "Stage 2's split lesson, played out live. The work of keeping similar identities apart never finishes; new authors keep being born with names that have already been claimed."
+    },
+    {
+      "year": "2024",
+      "type": "added-source",
+      "actor": "Wikidata · King estate",
+      "title": "Author estate links added",
+      "detail": "Stephen King Enterprises adds verified social-media handles and a canonical biographical site to the Wikidata item. The change is downstream of VIAF (the VIAF record is unchanged), but it now sits in the same identity cluster from the visitor's perspective.",
+      "significance": "Identity systems eventually have to integrate self-attested edges from the person themselves. Authority systems are conservative about this — they prefer institutional sources — but the catalogers' work is increasingly hybrid."
+    }
+  ],
+  "stewardshipNote": "Each entry above is a piece of institutional labor performed for free, by people whose job titles do not say 'identity engineer'. The maintenance is what makes the identifier worth pointing at decades later. Without it, every persistent identifier is just a string that used to resolve."
+}

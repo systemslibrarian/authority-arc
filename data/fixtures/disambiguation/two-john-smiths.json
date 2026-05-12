@@ -1,0 +1,48 @@
+{
+  "id": "two-john-smiths",
+  "kind": "split",
+  "prompt": "Same person, or two?",
+  "leftRecord": {
+    "curator": "LC",
+    "curatorLabel": "Library of Congress / NACO",
+    "recordId": "n50054268",
+    "heading": "Smith, John, 1580-1631",
+    "birthYear": "1580",
+    "deathYear": "1631",
+    "nationality": "English",
+    "field": "Soldier, explorer, colonial administrator",
+    "knownFor": [
+      "The Generall Historie of Virginia, New-England, and the Summer Isles (1624)",
+      "A Description of New England (1616)"
+    ],
+    "alternativeNames": ["Smith, John, Captain"]
+  },
+  "rightRecord": {
+    "curator": "LC",
+    "curatorLabel": "Library of Congress / NACO",
+    "recordId": "n79139831",
+    "heading": "Smith, John, 1797-1867",
+    "birthYear": "1797",
+    "deathYear": "1867",
+    "nationality": "American",
+    "field": "Painter (American landscape)",
+    "knownFor": [
+      "View of the Susquehanna (1832)",
+      "Autumn in the Catskills (1845)"
+    ],
+    "alternativeNames": ["Smith, John (American painter)"]
+  },
+  "viafDecision": {
+    "answer": "split",
+    "leftViafCluster": "5728359",
+    "rightViafCluster": "61560817",
+    "evidence": [
+      "Non-overlapping life dates (1580-1631 vs 1797-1867) — physically impossible to be the same person.",
+      "Different nationalities recorded across multiple national authorities.",
+      "Distinct domains of work — colonial military / cartography vs. landscape painting.",
+      "No cross-references in either LC record pointing at the other.",
+      "DNB, BNF, and Wikidata maintain separate clusters with no see-also linkage."
+    ]
+  },
+  "explanation": "Disambiguation isn't always about merging names that look different. Half the discipline is about *keeping apart* names that look identical. 'John Smith' is one of the most over-represented strings in any English-language catalog; VIAF currently holds hundreds of clusters for distinct people named John Smith. The work is the same as the merge case — verify identity claims against external evidence — but the conclusion runs the other way. Catalogers split when life dates, nationality, professional field, and source record cross-references all refuse to align. The honest version of this question is not 'are these two people the same?' but 'is there enough evidence to claim they are?'. Without that evidence, the default is to keep them apart."
+}

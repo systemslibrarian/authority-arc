@@ -1,0 +1,93 @@
+{
+  "id": "it-by-king",
+  "work": {
+    "title": "It",
+    "author": "Stephen King",
+    "publishedYear": "1986",
+    "publisher": "Viking",
+    "oclc": "13334268",
+    "isbn": "9780670813025"
+  },
+  "dewey": {
+    "number": "813.54",
+    "label": "American fiction — 1945–1999",
+    "path": [
+      {
+        "level": "Class",
+        "number": "800",
+        "label": "Literature & rhetoric",
+        "description": "The 800s hold every work that the catalog considers belles-lettres — fiction, poetry, drama, criticism — across all languages and periods."
+      },
+      {
+        "level": "Division",
+        "number": "810",
+        "label": "American literature in English",
+        "description": "American literature is a division of 800 because Dewey was designed in 1876 by an American librarian whose categories reflected the holdings he was actually shelving."
+      },
+      {
+        "level": "Section",
+        "number": "813",
+        "label": "American fiction in English",
+        "description": "Within American literature, fiction sits at .3. Poetry is .1, drama is .2. The order is not arbitrary — Dewey ordered the genres by what he believed was their relative literary weight."
+      },
+      {
+        "level": "Subsection",
+        "number": "813.5",
+        "label": "American fiction · 1900–",
+        "description": "The .5 chronological subdivision was added in the 11th edition (1923) to separate post-1900 fiction from earlier centuries — a recognition that 'modern' fiction needed its own shelving."
+      },
+      {
+        "level": "Finer",
+        "number": "813.54",
+        "label": "American fiction · 1945–1999",
+        "description": "Postwar through end-of-century. King's entire active publishing life sits here. The 21st-century portion of his career has begun to spill into 813.6."
+      }
+    ],
+    "siblings": [
+      { "number": "813.52", "label": "1900–1944" },
+      { "number": "813.6", "label": "2000–" },
+      { "number": "813.4", "label": "1865–1900" }
+    ]
+  },
+  "fast": {
+    "headings": [
+      {
+        "facet": "Topical",
+        "fastId": "fst00978999",
+        "label": "Horror tales",
+        "note": "The genre signal. FAST's topical facet groups works by what they are *about as form*."
+      },
+      {
+        "facet": "Geographic",
+        "fastId": "fst01204528",
+        "label": "Maine",
+        "note": "The novel's setting. Geographic facets carry their own controlled vocabulary, rooted in LCSH place names but with FAST's flattened syntax."
+      },
+      {
+        "facet": "Topical",
+        "fastId": "fst00855802",
+        "label": "Children — Crimes against",
+        "note": "A topical heading describing what the book engages with — not what genre it is, but what its subject matter touches."
+      },
+      {
+        "facet": "Topical",
+        "fastId": "fst00863361",
+        "label": "Clowns",
+        "note": "FAST is granular enough that even a recurring symbol can earn its own access point if a book engages with it heavily."
+      },
+      {
+        "facet": "Form / Genre",
+        "fastId": "fst01423787",
+        "label": "Fiction",
+        "note": "The form facet. Separated from the topical facet so a non-fiction book about horror is still findable distinctly from a horror novel."
+      },
+      {
+        "facet": "Chronological",
+        "fastId": "fst01149162",
+        "label": "20th century",
+        "note": "Chronological facets attach to subjects (when the work depicts) rather than to publication date (which lives in the catalog record proper)."
+      }
+    ],
+    "philosophy": "A book in FAST is not in one place — it is at the intersection of all its access points. Two visitors looking for it will arrive from different directions: one looking for horror tales, one looking for Maine, one looking for novels about children. Each path is a real way the catalog can find the book."
+  }
+}

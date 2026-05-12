@@ -1,4 +1,9 @@
-import type { ResolvedEntity, SourceIdentifier } from "./types";
+import type {
+  AutoSuggestHit,
+  AutoSuggestResponse,
+  ResolvedEntity,
+  SourceIdentifier,
+} from "./types";
 import { lookupCurator } from "./curators";
 
 /**
@@ -142,6 +147,97 @@ function normalizeVIAFCluster(
       fetchedAt: new Date().toISOString(),
     },
   };
+}
+
+/**
+ * Hit VIAF's AutoSuggest endpoint and normalize the results.
+ *
+ * Endpoint: GET https://viaf.org/viaf/AutoSuggest?query=<text>
+ *
+ * The raw response is { query, result: [{ term, viafid, displayForm,
+ * nametype, lc, wkp, dnb, bnf, fast, ... }] }. We pluck the cluster id,
+ * display form, name type, and the well-known sister identifiers so the
+ * preview chips on the typeahead can give a visual hint of which catalogs
+ * the cluster touches without an extra fetch.
+ *
+ * Throws on non-2xx or timeout. The /api/autosuggest route surfaces those
+ * as typed errors with fixture fallback when appropriate.
+ */
+export async function viafAutoSuggest(
+  query: string,
+  options?: { signal?: AbortSignal }
+): Promise<AutoSuggestResponse> {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return {
+      query: trimmed,
+      hits: [],
+      wire: {
+        requestUrl: `${VIAF_BASE}/viaf/AutoSuggest`,
+        responseStatus: 200,
+        fetchedAt: new Date().toISOString(),
+      },
+    };
+  }
+
+  const url = `${VIAF_BASE}/viaf/AutoSuggest?query=${encodeURIComponent(trimmed)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    signal: options?.signal ?? AbortSignal.timeout(10_000),
+    redirect: "follow",
+  });
+
+  if (!response.ok) {
+    const err: any = new Error(`VIAF AutoSuggest returned ${response.status}`);
+    err.code = response.status === 404 ? "NOT_FOUND" : "UPSTREAM_ERROR";
+    err.status = response.status;
+    throw err;
+  }
+
+  const json = await response.json();
+  const hits: AutoSuggestHit[] = [];
+  for (const raw of asArray(json?.result)) {
+    const viafId: string | undefined =
+      raw?.viafid ?? raw?.recordID ?? raw?.recordId;
+    const label: string | undefined = raw?.displayForm ?? raw?.term;
+    if (!viafId || !label) continue;
+    hits.push({
+      viafId: String(viafId),
+      label,
+      nameType: typeof raw?.nametype === "string" ? raw.nametype : undefined,
+      identifiers: {
+        lc: pickIdentifier(raw?.lc),
+        wikidata: pickIdentifier(raw?.wkp),
+        dnb: pickIdentifier(raw?.dnb),
+        bnf: pickIdentifier(raw?.bnf),
+        fast: pickIdentifier(raw?.fast),
+      },
+    });
+  }
+
+  return {
+    query: trimmed,
+    hits,
+    wire: {
+      requestUrl: url,
+      responseStatus: response.status,
+      fetchedAt: new Date().toISOString(),
+    },
+  };
+}
+
+/**
+ * VIAF AutoSuggest sometimes returns identifier fields as strings, sometimes
+ * as arrays (when a cluster has multiple). We take the first non-empty value.
+ */
+function pickIdentifier(raw: unknown): string | undefined {
+  if (typeof raw === "string" && raw.length > 0) return raw;
+  if (Array.isArray(raw)) {
+    const first = raw.find((v) => typeof v === "string" && v.length > 0);
+    if (typeof first === "string") return first;
+  }
+  return undefined;
 }
 
 function asArray<T>(v: T | T[] | null | undefined): T[] {

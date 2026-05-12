@@ -1,0 +1,49 @@
+{
+  "id": "twain-clemens",
+  "kind": "merge",
+  "prompt": "Same person, or two?",
+  "leftRecord": {
+    "curator": "LC",
+    "curatorLabel": "Library of Congress / NACO",
+    "recordId": "n79021164",
+    "heading": "Twain, Mark, 1835-1910",
+    "birthYear": "1835",
+    "deathYear": "1910",
+    "nationality": "American",
+    "field": "Author, humorist, lecturer",
+    "knownFor": [
+      "Adventures of Huckleberry Finn",
+      "The Adventures of Tom Sawyer",
+      "Life on the Mississippi"
+    ],
+    "alternativeNames": ["Twain, Marc", "Twen, Mark"]
+  },
+  "rightRecord": {
+    "curator": "LC",
+    "curatorLabel": "Library of Congress / NACO",
+    "recordId": "n80050259",
+    "heading": "Clemens, Samuel Langhorne, 1835-1910",
+    "birthYear": "1835",
+    "deathYear": "1910",
+    "nationality": "American",
+    "field": "Author, journalist, riverboat pilot",
+    "knownFor": [
+      "Letters from Hawaii (as Samuel L. Clemens)",
+      "Autobiography of Mark Twain"
+    ],
+    "alternativeNames": ["Clemens, Sam", "Clemens, S. L."]
+  },
+  "viafDecision": {
+    "answer": "merge",
+    "viafCluster": "50566653",
+    "preferredHeading": "Twain, Mark, 1835-1910",
+    "evidence": [
+      "Identical birth and death years (1835, 1910).",
+      "Cross-reference from the LC authority record for Clemens to the Twain heading: '470 _ |a Twain, Mark, 1835-1910'.",
+      "Cross-reference from the LC authority for Twain to Clemens via 400 / 500 see-also.",
+      "DNB, BNF, and Wikidata all collapse both names into a single entity.",
+      "The pseudonym is documented in the contemporaneous record — Clemens published under 'Mark Twain' beginning 1863."
+    ]
+  },
+  "explanation": "The pseudonym case is the founding lesson of authority disambiguation. Two name forms, one person — and the merge is provable because the *person himself* documented the link. VIAF's confidence here is structurally near-total: every national library that has touched either name has crosswalked them. The harder cases come when the link is undocumented (a private pseudonym, an alias in samizdat), or when the cross-reference itself is contested (was John le Carré's first novel really by him?). The pseudonym link is older than VIAF, older than MARC, older than the web — it is one of the oldest cataloging operations there is."
+}
