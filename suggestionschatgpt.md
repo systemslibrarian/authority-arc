@@ -89,7 +89,7 @@ I would add:
 - ⏭ **A glossary for domain terms.** — deferred. This is a content-authoring project (curator, cluster, MARC, FAST, LCNAF, ISNI, VIAF, etc.) and deserves its own sprint.
 - ✅ **Progress indicators across stages.** *(PR #2)* — eyebrows now read "§ 0X of 05 — Stage X · …"; landing intro gets a "● 1 of 5 live" chip.
 - ⏭ **Better onboarding for engineers unfamiliar with library metadata.** — deferred. Partially addressed by the existing essay copy and Honest Capability framing, but a dedicated "for engineers" on-ramp is a separate piece.
-- ◐ **Stronger metadata and social sharing presentation.** — base `<title>` template, OpenGraph metadata, and `metadataBase` already in `app/layout.tsx`. Per-stage OG images and Twitter card art still TODO.
+- ✅ **Stronger metadata and social sharing presentation.** *(PR #2)* — base `<title>` template, OpenGraph metadata, and `metadataBase` already in `app/layout.tsx`; now joined by per-route `opengraph-image.tsx` files (six on-brand 1200×630 PNGs rendered with `next/og` + Fraunces) and a `twitter: { card: "summary_large_image" }` metadata block so Twitter/Slack/iMessage previews look deliberate.
 - ✅ **A more explicit reason to continue from one stage to the next.** *(PR #2)* — new "Continue to Stage 2" museum-placard callout card above the identify footer, explicitly framed against what just happened in Stage 1.
 
 ## Bottom line
