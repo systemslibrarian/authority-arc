@@ -30,7 +30,7 @@ export function StageStub({
     <main id="main-content">
       <section className="relative mx-auto max-w-[1100px] px-5 pb-12 pt-12 sm:px-7 sm:pb-16 sm:pt-[90px]">
         <p className="font-mono text-[12px] uppercase tracking-eyebrow text-oxblood">
-          <span className="text-ink-faint">§ {num} — </span>Stage{" "}
+          <span className="text-ink-faint">§ {num} of 05 — </span>Stage{" "}
           {numToWord(num)} · {title}
         </p>
 

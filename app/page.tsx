@@ -52,9 +52,21 @@ export default function Landing() {
   return (
     <main id="main-content" className="mx-auto max-w-[1100px] px-5 pb-24 pt-12 sm:px-7 sm:pb-32 sm:pt-[90px]">
       {/* ─── HERO ───────────────────────────────────────────────────── */}
-      <p className="font-mono text-[12px] uppercase tracking-eyebrow text-oxblood">
-        <span className="text-ink-faint">A five-stage arc · </span>
-        Introduction
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[12px] uppercase tracking-eyebrow text-oxblood">
+        <span>
+          <span className="text-ink-faint">A five-stage arc · </span>
+          Introduction
+        </span>
+        <span
+          aria-label="One of five stages currently live"
+          className="inline-flex items-center gap-1.5 rounded-[2px] border border-rule px-2 py-0.5 text-[10px] text-ink-faint"
+        >
+          <span
+            aria-hidden="true"
+            className="inline-block h-1.5 w-1.5 rounded-full bg-[#7a9a5a]"
+          />
+          1 of 5 live
+        </span>
       </p>
       <h1 className="mt-7 max-w-[920px] font-display text-[clamp(48px,7.5vw,92px)] font-[360] leading-[.96] tracking-[-0.025em]">
         How librarians solved <em className="italic text-oxblood">identity</em>,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ResolvedEntity, ResolveError } from "@/lib/types";
 
 const STARTER_CHIPS = [
@@ -18,42 +19,99 @@ type State =
   | { kind: "resolved"; data: ResolvedEntity }
   | { kind: "error"; error: ResolveError };
 
-export function Resolver() {
-  const [curator, setCurator] = useState("LC");
-  const [id, setId] = useState("n79018049");
-  const [state, setState] = useState<State>({ kind: "idle" });
-  const [openNote, setOpenNote] = useState<string | null>(null);
+interface ResolverProps {
+  /**
+   * Server-seeded fixture so the first visit to /identify isn't blank. Used
+   * only when the URL has no curator/id params. Click "Resolve" to refresh
+   * the same record against live VIAF.
+   */
+  initial?: ResolvedEntity;
+}
 
-  async function resolve(c: string, i: string) {
-    setCurator(c);
-    setId(i);
-    setState({ kind: "loading" });
-    setOpenNote(null);
-    try {
-      const res = await fetch("/api/resolve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ curator: c, id: i }),
-      });
-      if (!res.ok) {
-        const err = (await res.json()) as ResolveError;
-        setState({ kind: "error", error: err });
-        return;
+export function Resolver({ initial }: ResolverProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const paramCurator = searchParams.get("curator");
+  const paramId = searchParams.get("id");
+
+  const [curator, setCurator] = useState(paramCurator ?? initial?.query.curator ?? "LC");
+  const [id, setId] = useState(paramId ?? initial?.query.id ?? "n79018049");
+  const [state, setState] = useState<State>(
+    initial && !paramCurator && !paramId
+      ? { kind: "resolved", data: initial }
+      : { kind: "idle" }
+  );
+  const [validation, setValidation] = useState<{ curator?: string; id?: string }>({});
+
+  // Update the URL after a successful (curator,id) request, without scroll.
+  const pushUrl = useCallback(
+    (c: string, i: string) => {
+      const qs = new URLSearchParams({ curator: c, id: i }).toString();
+      router.replace(`${pathname}?${qs}`, { scroll: false });
+    },
+    [router, pathname]
+  );
+
+  const resolve = useCallback(
+    async (c: string, i: string, options?: { skipUrlUpdate?: boolean }) => {
+      const cTrim = c.trim();
+      const iTrim = i.trim();
+      const next: { curator?: string; id?: string } = {};
+      if (!cTrim) next.curator = "Curator code is required.";
+      if (!iTrim) next.id = "Identifier is required.";
+      setValidation(next);
+      if (next.curator || next.id) return;
+
+      setCurator(cTrim);
+      setId(iTrim);
+      setState({ kind: "loading" });
+      try {
+        const res = await fetch("/api/resolve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ curator: cTrim, id: iTrim }),
+        });
+        if (!res.ok) {
+          const err = (await res.json()) as ResolveError;
+          setState({ kind: "error", error: err });
+          return;
+        }
+        const data = (await res.json()) as ResolvedEntity;
+        setState({ kind: "resolved", data });
+        if (!options?.skipUrlUpdate) pushUrl(cTrim, iTrim);
+      } catch (e: any) {
+        setState({
+          kind: "error",
+          error: {
+            error: true,
+            status: 0,
+            code: "UNKNOWN",
+            message: e?.message ?? "Network error",
+          },
+        });
       }
-      const data = (await res.json()) as ResolvedEntity;
-      setState({ kind: "resolved", data });
-    } catch (e: any) {
-      setState({
-        kind: "error",
-        error: {
-          error: true,
-          status: 0,
-          code: "UNKNOWN",
-          message: e?.message ?? "Network error",
-        },
-      });
+    },
+    [pushUrl]
+  );
+
+  // On mount (or when URL params change via back/forward), if URL specifies a
+  // (curator, id) that isn't already showing as the resolved record, fetch it.
+  useEffect(() => {
+    if (!paramCurator || !paramId) return;
+    setCurator(paramCurator);
+    setId(paramId);
+    const showing = state.kind === "resolved" ? state.data.query : null;
+    if (
+      showing &&
+      showing.curator.toUpperCase() === paramCurator.toUpperCase() &&
+      showing.id === paramId
+    ) {
+      return; // already showing this record
     }
-  }
+    resolve(paramCurator, paramId, { skipUrlUpdate: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramCurator, paramId]);
 
   return (
     <>
@@ -66,6 +124,8 @@ export function Resolver() {
             resolve(curator, id);
           }}
           aria-describedby="resolver-help"
+          aria-busy={state.kind === "loading"}
+          noValidate
         >
           <div className="flex-shrink-0 sm:w-[120px]">
             <label
@@ -78,15 +138,33 @@ export function Resolver() {
               id="pid-curator"
               name="curator"
               value={curator}
-              onChange={(e) => setCurator(e.target.value)}
-              className="w-full rounded-[2px] border border-rule bg-paper px-3 py-3 font-mono text-[14px] uppercase tracking-[.05em] text-ink outline-none focus:border-oxblood focus:ring-[3px] focus:ring-oxblood/20"
+              onChange={(e) => {
+                setCurator(e.target.value);
+                if (validation.curator) setValidation((v) => ({ ...v, curator: undefined }));
+              }}
+              className={`w-full rounded-[2px] border bg-paper px-3 py-3 font-mono text-[14px] uppercase tracking-[.05em] text-ink outline-none focus:ring-[3px] focus:ring-oxblood/20 ${
+                validation.curator
+                  ? "border-oxblood focus:border-oxblood"
+                  : "border-rule focus:border-oxblood"
+              }`}
               placeholder="LC"
               autoComplete="off"
               autoCapitalize="characters"
               autoCorrect="off"
               spellCheck={false}
               inputMode="text"
+              aria-invalid={validation.curator ? true : undefined}
+              aria-describedby={validation.curator ? "pid-curator-error" : undefined}
             />
+            {validation.curator && (
+              <p
+                id="pid-curator-error"
+                role="alert"
+                className="mt-1.5 font-mono text-[10px] uppercase tracking-eyebrow text-oxblood"
+              >
+                {validation.curator}
+              </p>
+            )}
           </div>
           <div className="flex-1">
             <label
@@ -99,14 +177,32 @@ export function Resolver() {
               id="pid-id"
               name="identifier"
               value={id}
-              onChange={(e) => setId(e.target.value)}
-              className="w-full rounded-[2px] border border-rule bg-paper px-4 py-3 font-mono text-[14px] text-ink outline-none focus:border-oxblood focus:ring-[3px] focus:ring-oxblood/20"
+              onChange={(e) => {
+                setId(e.target.value);
+                if (validation.id) setValidation((v) => ({ ...v, id: undefined }));
+              }}
+              className={`w-full rounded-[2px] border bg-paper px-4 py-3 font-mono text-[14px] text-ink outline-none focus:ring-[3px] focus:ring-oxblood/20 ${
+                validation.id
+                  ? "border-oxblood focus:border-oxblood"
+                  : "border-rule focus:border-oxblood"
+              }`}
               placeholder="n79018049"
               autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
               inputMode="text"
+              aria-invalid={validation.id ? true : undefined}
+              aria-describedby={validation.id ? "pid-id-error" : undefined}
             />
+            {validation.id && (
+              <p
+                id="pid-id-error"
+                role="alert"
+                className="mt-1.5 font-mono text-[10px] uppercase tracking-eyebrow text-oxblood"
+              >
+                {validation.id}
+              </p>
+            )}
           </div>
           <div className="flex items-end">
             <button
@@ -152,18 +248,12 @@ export function Resolver() {
       {/* live region — screen readers hear resolution outcomes */}
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {state.kind === "loading" && "Resolving identifier…"}
-        {state.kind === "resolved" && `Resolved ${state.data.query.curator} ${state.data.query.id} to ${state.data.label ?? "an entity"} with ${state.data.sameAs.length} related identifiers.`}
+        {state.kind === "resolved" && `Resolved ${state.data.query.curator} ${state.data.query.id} to ${state.data.label ?? "an entity"} with ${state.data.sameAs.length} related identifiers. Source: ${describeSource(state.data.source)}.`}
         {state.kind === "error" && `Resolution failed: ${state.error.message}`}
       </div>
 
       {/* resolved card */}
-      {state.kind === "resolved" && (
-        <ResolvedCard
-          data={state.data}
-          openNote={openNote}
-          setOpenNote={setOpenNote}
-        />
-      )}
+      {state.kind === "resolved" && <ResolvedCard data={state.data} />}
 
       {state.kind === "error" && (
         <div className="rounded-[2px] border border-oxblood/40 bg-paper p-6">
@@ -187,25 +277,32 @@ export function Resolver() {
 // The resolved card — a museum placard rendered from the API response.
 // ────────────────────────────────────────────────────────────────────────────
 
-function ResolvedCard({
-  data,
-  openNote,
-  setOpenNote,
-}: {
-  data: ResolvedEntity;
-  openNote: string | null;
-  setOpenNote: (n: string | null) => void;
-}) {
-  const toggle = (n: string) => setOpenNote(openNote === n ? null : n);
+function ResolvedCard({ data }: { data: ResolvedEntity }) {
+  const [openNote, setOpenNote] = useState<string | null>(null);
+  // Restoring focus to the trigger that opened an annotation when it closes.
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const openAnnotation = useCallback((noteId: string, trigger: HTMLButtonElement | null) => {
+    triggerRef.current = trigger;
+    setOpenNote(noteId);
+  }, []);
+
+  const closeAnnotation = useCallback(() => {
+    setOpenNote(null);
+    // Run on the next frame so the annotation has unmounted and focus
+    // can land cleanly on the trigger.
+    const el = triggerRef.current;
+    if (el) requestAnimationFrame(() => el.focus());
+  }, []);
 
   useEffect(() => {
     if (!openNote) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpenNote(null);
+      if (e.key === "Escape") closeAnnotation();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openNote, setOpenNote]);
+  }, [openNote, closeAnnotation]);
 
   return (
     <div className="animate-fade-up overflow-hidden rounded-[2px] border border-rule bg-paper shadow-paper">
@@ -214,9 +311,7 @@ function ResolvedCard({
         <span className="break-all">
           {data.wire.requestMethod} {prettyEndpointFor(data)} · {data.wire.responseStatus} OK
         </span>
-        <span className="text-[#b8d4a8]">
-          <span aria-hidden="true">● </span>resolved · source: {data.source}
-        </span>
+        <ProvenancePill source={data.source} />
       </div>
 
       <div className="p-5 sm:p-8">
@@ -232,13 +327,22 @@ function ResolvedCard({
           </div>
         )}
 
-        <Field label="Canonical URI">
-          <Annotated id="uri" openNote={openNote} setOpenNote={toggle}>
+        <Field label="Canonical URI" copyValue={data.canonicalUri}>
+          <Annotated
+            id="uri"
+            openNote={openNote}
+            onOpen={openAnnotation}
+          >
             {data.canonicalUri}
           </Annotated>
         </Field>
 
-        <Annotation id="uri" open={openNote === "uri"} onClose={() => setOpenNote(null)} title="The URI on top of the identifiers">
+        <Annotation
+          id="uri"
+          open={openNote === "uri"}
+          onClose={closeAnnotation}
+          title="The URI on top of the identifiers"
+        >
           This URL is the meta-identifier — a single persistent reference that
           survives any one source catalog going dark, rebranding, or restructuring
           its identifier scheme. The Library of Congress could disappear tomorrow
@@ -250,7 +354,11 @@ function ResolvedCard({
         </Annotation>
 
         <Field label="Curator">
-          <Annotated id="curator" openNote={openNote} setOpenNote={toggle}>
+          <Annotated
+            id="curator"
+            openNote={openNote}
+            onOpen={openAnnotation}
+          >
             {data.query.curator}
           </Annotated>
           {data.query.curatorLabel && (
@@ -260,7 +368,12 @@ function ResolvedCard({
           )}
         </Field>
 
-        <Annotation id="curator" open={openNote === "curator"} onClose={() => setOpenNote(null)} title="A curator is not a database. It is an obligation.">
+        <Annotation
+          id="curator"
+          open={openNote === "curator"}
+          onClose={closeAnnotation}
+          title="A curator is not a database. It is an obligation."
+        >
           The OCLC PID Lookup API has a second endpoint{" "}
           <code className="font-mono text-[0.9em]">GET /v1/pid-lookup/curator</code>{" "}
           that returns metadata about <em>who</em> issued an identifier — the
@@ -272,23 +385,36 @@ function ResolvedCard({
           before URIs and DNS were named.
         </Annotation>
 
-        <Field label="Identifier">
+        <Field label="Identifier" copyValue={data.query.id}>
           <span className="font-mono text-[13px] text-ink">{data.query.id}</span>
         </Field>
 
         <Field label="entityMd5">
           {data.entityMd5 ? (
-            <Annotated id="md5" openNote={openNote} setOpenNote={toggle}>
+            <Annotated
+              id="md5"
+              openNote={openNote}
+              onOpen={openAnnotation}
+            >
               {data.entityMd5}
             </Annotated>
           ) : (
-            <Annotated id="md5-absent" openNote={openNote} setOpenNote={toggle}>
+            <Annotated
+              id="md5-absent"
+              openNote={openNote}
+              onOpen={openAnnotation}
+            >
               <em className="italic text-ink-faint">not published by this source</em>
             </Annotated>
           )}
         </Field>
 
-        <Annotation id="md5" open={openNote === "md5"} onClose={() => setOpenNote(null)} title="The fingerprint underneath the name">
+        <Annotation
+          id="md5"
+          open={openNote === "md5"}
+          onClose={closeAnnotation}
+          title="The fingerprint underneath the name"
+        >
           Every WorldCat entity is published with an MD5 hash of its own content,{" "}
           <em>computed by OCLC.</em> Change a single field on the entity — correct
           a birth year, add a pseudonym, merge in a duplicate — and OCLC
@@ -311,7 +437,12 @@ function ResolvedCard({
           </span>
         </Annotation>
 
-        <Annotation id="md5-absent" open={openNote === "md5-absent"} onClose={() => setOpenNote(null)} title="VIAF does not publish a content hash">
+        <Annotation
+          id="md5-absent"
+          open={openNote === "md5-absent"}
+          onClose={closeAnnotation}
+          title="VIAF does not publish a content hash"
+        >
           VIAF clusters are versioned by date, but the cluster record itself
           does not ship with a content fingerprint. To detect that a cluster
           has changed, a consumer must re-fetch and diff the whole record.
@@ -365,6 +496,12 @@ function prettyEndpointFor(d: ResolvedEntity): string {
   return "FIXTURE";
 }
 
+function describeSource(source: ResolvedEntity["source"]): string {
+  if (source === "viaf") return "live VIAF";
+  if (source === "oclc-pid-lookup") return "OCLC PID Lookup";
+  return "bundled fixture";
+}
+
 function formatWire(d: ResolvedEntity): string {
   return [
     `${d.wire.requestMethod} ${d.wire.requestUrl}`,
@@ -389,13 +526,84 @@ function formatWire(d: ResolvedEntity): string {
     .join("\n");
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Provenance pill: tells the visitor at a glance whether the record they're
+// looking at came from live VIAF, the bundled offline fixture, or OCLC.
+// ────────────────────────────────────────────────────────────────────────────
+
+function ProvenancePill({ source }: { source: ResolvedEntity["source"] }) {
+  const { dot, label } = pillStyle(source);
+  return (
+    <span
+      className="inline-flex items-center gap-2 normal-case"
+      title={
+        source === "viaf"
+          ? "Live response from VIAF."
+          : source === "fixture"
+          ? "Bundled fixture — a captured VIAF response served when the page loads or VIAF is unreachable."
+          : "Live response from OCLC PID Lookup."
+      }
+    >
+      <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full ${dot}`} />
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function pillStyle(source: ResolvedEntity["source"]): { dot: string; label: string } {
+  if (source === "viaf") return { dot: "bg-[#b8d4a8]", label: "Live · VIAF" };
+  if (source === "oclc-pid-lookup") return { dot: "bg-[#b8d4a8]", label: "Live · OCLC" };
+  return { dot: "bg-ochre", label: "Fixture fallback" };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Copy-to-clipboard helper, used inline next to identifiers and URIs.
+// ────────────────────────────────────────────────────────────────────────────
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  async function onCopy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard API unavailable (insecure context, etc). Fail quietly —
+      // the value is still visible and selectable in the field.
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onCopy}
+      aria-label={copied ? `${label} copied` : `Copy ${label}`}
+      className="inline-flex items-center gap-1 rounded-[2px] border border-rule bg-paper px-2 py-1 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint transition-colors hover:border-oxblood hover:text-oxblood focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+    >
+      <span aria-hidden="true">{copied ? "✓" : "⧉"}</span>
+      <span>{copied ? "copied" : "copy"}</span>
+    </button>
+  );
+}
+
 // ── tiny helpers ─────────────────────────────────────────────────────────────
 
 function Field({
   label,
+  copyValue,
   children,
 }: {
   label: string;
+  copyValue?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -403,7 +611,10 @@ function Field({
       <div className="pt-1 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
         {label}
       </div>
-      <div className="break-all font-mono text-[13px] text-ink">{children}</div>
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-0 flex-1 break-all font-mono text-[13px] text-ink">{children}</div>
+        {copyValue && <CopyButton value={copyValue} label={label} />}
+      </div>
     </div>
   );
 }
@@ -411,19 +622,19 @@ function Field({
 function Annotated({
   id,
   openNote,
-  setOpenNote,
+  onOpen,
   children,
 }: {
   id: string;
   openNote: string | null;
-  setOpenNote: (id: string) => void;
+  onOpen: (noteId: string, trigger: HTMLButtonElement | null) => void;
   children: React.ReactNode;
 }) {
   const active = openNote === id;
   return (
     <button
       type="button"
-      onClick={() => setOpenNote(id)}
+      onClick={(e) => onOpen(id, e.currentTarget)}
       aria-expanded={active}
       aria-controls={`note-${id}`}
       className={`cursor-pointer border-b border-dotted border-oxblood pb-0.5 text-left transition-colors hover:bg-oxblood/[.06] focus-visible:bg-oxblood/[.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper ${active ? "bg-oxblood/[.06]" : ""}`}
