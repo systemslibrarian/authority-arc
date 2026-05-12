@@ -22,13 +22,14 @@ const config: Config = {
         "paper-edge":"#d8cfba",
         ink:         "#1a1a24",
         "ink-soft":  "#3a3a48",
-        "ink-faint": "#6a6a78",
+        "ink-faint": "#5a5a68",
         rule:        "#c9bfa5",
         oxblood:     "#6e1f1f",
         "oxblood-deep":"#4a1414",
         indigo:      "#1f3a6e",
         "indigo-deep":"#122249",
         ochre:       "#a8762a",
+        "ochre-deep":"#7a5215",
       },
       fontFamily: {
         // Display: Fraunces, an opinionated serif with optical sizing + SOFT/WONK axes

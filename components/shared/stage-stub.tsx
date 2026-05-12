@@ -27,8 +27,8 @@ export function StageStub({
   next,
 }: StageStubProps) {
   return (
-    <main>
-      <section className="relative mx-auto max-w-[1100px] px-7 pb-16 pt-[90px]">
+    <main id="main-content">
+      <section className="relative mx-auto max-w-[1100px] px-5 pb-12 pt-12 sm:px-7 sm:pb-16 sm:pt-[90px]">
         <p className="font-mono text-[12px] uppercase tracking-eyebrow text-oxblood">
           <span className="text-ink-faint">§ {num} — </span>Stage{" "}
           {numToWord(num)} · {title}
@@ -43,7 +43,7 @@ export function StageStub({
         </p>
 
         <div className="mt-12 inline-block rounded-[2px] border border-ochre/40 bg-paper-deep px-6 py-4">
-          <p className="m-0 font-mono text-[11px] uppercase tracking-eyebrow text-ochre">
+          <p className="m-0 font-mono text-[11px] uppercase tracking-eyebrow text-ochre-deep">
             In preparation
           </p>
           <p className="m-0 mt-1 font-display text-[15px] italic text-ink-soft">
@@ -52,9 +52,9 @@ export function StageStub({
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1100px] px-7 pb-20">
+      <section className="mx-auto max-w-[1100px] px-5 sm:px-7 pb-20">
         <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-3.5">
-          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre-deep">
             Outline
           </span>
           <h2 className="m-0 flex-1 font-display text-[24px] font-[380] tracking-[-0.01em]">
@@ -77,14 +77,17 @@ export function StageStub({
       </section>
 
       <footer className="border-t border-rule bg-paper-deep py-7">
-        <div className="mx-auto flex max-w-[1100px] items-center justify-between px-7 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+        <nav
+          aria-label="Stage navigation"
+          className="mx-auto flex max-w-[1100px] flex-col items-start justify-between gap-3 px-5 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint sm:flex-row sm:items-center sm:px-7"
+        >
           <div>
             {prev ? (
               <Link
                 href={`/${prev.slug}`}
-                className="text-oxblood transition-colors hover:text-oxblood-deep"
+                className="rounded-[2px] text-oxblood transition-colors hover:text-oxblood-deep"
               >
-                ← Previous: Stage {prev.num} — {prev.title}
+                <span aria-hidden="true">← </span>Previous: Stage {prev.num} — {prev.title}
               </Link>
             ) : (
               <span>The Authority Arc · A systemslibrarian project</span>
@@ -93,12 +96,12 @@ export function StageStub({
           {next && (
             <Link
               href={`/${next.slug}`}
-              className="text-oxblood transition-colors hover:text-oxblood-deep"
+              className="rounded-[2px] text-oxblood transition-colors hover:text-oxblood-deep"
             >
-              Next: Stage {next.num} — {next.title} →
+              Next: Stage {next.num} — {next.title}<span aria-hidden="true"> →</span>
             </Link>
           )}
-        </div>
+        </nav>
       </footer>
     </main>
   );

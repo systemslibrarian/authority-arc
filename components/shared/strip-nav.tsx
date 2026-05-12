@@ -24,18 +24,26 @@ export function StripNav() {
   const pathname = usePathname() ?? "/";
 
   return (
-    <header className="border-b border-rule bg-paper py-[18px]">
-      <div className="mx-auto flex max-w-[1100px] items-baseline justify-between gap-8 px-7">
-        <Link
-          href="/"
-          className="font-mono text-[11px] uppercase tracking-strip text-oxblood transition-colors hover:text-oxblood-deep"
-        >
-          The Authority Arc
-        </Link>
+    <header className="border-b border-rule bg-paper py-3.5 sm:py-[18px]">
+      <div className="mx-auto flex max-w-[1100px] flex-col items-stretch gap-3 px-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8 sm:px-7">
+        <div className="flex items-baseline justify-between gap-4">
+          <Link
+            href="/"
+            className="font-mono text-[11px] uppercase tracking-strip text-oxblood transition-colors hover:text-oxblood-deep"
+          >
+            The Authority Arc
+          </Link>
+          <a
+            href="https://systemslibrarian.dev"
+            className="font-mono text-[10px] uppercase tracking-strip text-ink-faint transition-colors hover:text-ink sm:hidden"
+          >
+            systemslibrarian.dev
+          </a>
+        </div>
 
         <nav
           aria-label="Arc stages"
-          className="no-scrollbar flex gap-[18px] overflow-x-auto font-mono text-[11px] uppercase tracking-strip text-ink-faint"
+          className="no-scrollbar -mx-5 flex gap-[18px] overflow-x-auto px-5 font-mono text-[11px] uppercase tracking-strip text-ink-faint sm:mx-0 sm:px-0"
         >
           {STAGES.map((stage) => {
             const href = `/${stage.slug}`;
@@ -46,12 +54,14 @@ export function StripNav() {
                 href={href}
                 aria-current={isCurrent ? "page" : undefined}
                 className={
-                  isCurrent
+                  "whitespace-nowrap " +
+                  (isCurrent
                     ? "border-b border-ink pb-[2px] text-ink"
-                    : "opacity-35 hover:opacity-100 hover:text-ink"
+                    : "opacity-60 hover:opacity-100 hover:text-ink sm:opacity-50")
                 }
               >
-                {stage.num} {stage.label}
+                <span aria-hidden="true">{stage.num} </span>
+                {stage.label}
               </Link>
             );
           })}
@@ -59,7 +69,7 @@ export function StripNav() {
 
         <a
           href="https://systemslibrarian.dev"
-          className="font-mono text-[11px] uppercase tracking-strip text-ink-faint transition-colors hover:text-ink"
+          className="hidden font-mono text-[11px] uppercase tracking-strip text-ink-faint transition-colors hover:text-ink sm:inline"
         >
           systemslibrarian.dev
         </a>

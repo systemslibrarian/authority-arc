@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ResolvedEntity, ResolveError } from "@/lib/types";
 
 const STARTER_CHIPS = [
@@ -58,59 +58,102 @@ export function Resolver() {
   return (
     <>
       {/* resolver shell */}
-      <div className="mb-7 rounded-[2px] border border-paper-edge bg-paper-deep p-9 shadow-paper">
-        <label
-          htmlFor="pid-curator"
-          className="mb-2.5 block font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint"
-        >
-          Paste a persistent identifier
-        </label>
+      <div className="mb-7 rounded-[2px] border border-paper-edge bg-paper-deep p-5 shadow-paper sm:p-9">
         <form
-          className="flex gap-3"
+          className="flex flex-col gap-3 sm:flex-row"
           onSubmit={(e) => {
             e.preventDefault();
             resolve(curator, id);
           }}
+          aria-describedby="resolver-help"
         >
-          <input
-            id="pid-curator"
-            value={curator}
-            onChange={(e) => setCurator(e.target.value)}
-            className="w-[100px] rounded-[2px] border border-rule bg-paper px-3 py-3.5 font-mono text-[13px] uppercase tracking-[.05em] text-ink outline-none focus:border-oxblood focus:ring-[3px] focus:ring-oxblood/10"
-            placeholder="LC"
-            aria-label="Curator code"
-          />
-          <input
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            className="flex-1 rounded-[2px] border border-rule bg-paper px-4 py-3.5 font-mono text-[14px] text-ink outline-none focus:border-oxblood focus:ring-[3px] focus:ring-oxblood/10"
-            placeholder="n79018049"
-            aria-label="Identifier value"
-          />
-          <button
-            type="submit"
-            disabled={state.kind === "loading"}
-            className="rounded-[2px] bg-ink px-6 font-mono text-[11px] uppercase tracking-eyebrow text-paper transition-colors hover:bg-oxblood disabled:opacity-50"
-          >
-            {state.kind === "loading" ? "Resolving…" : "Resolve →"}
-          </button>
+          <div className="flex-shrink-0 sm:w-[120px]">
+            <label
+              htmlFor="pid-curator"
+              className="mb-1.5 block font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint"
+            >
+              Curator
+            </label>
+            <input
+              id="pid-curator"
+              name="curator"
+              value={curator}
+              onChange={(e) => setCurator(e.target.value)}
+              className="w-full rounded-[2px] border border-rule bg-paper px-3 py-3 font-mono text-[14px] uppercase tracking-[.05em] text-ink outline-none focus:border-oxblood focus:ring-[3px] focus:ring-oxblood/20"
+              placeholder="LC"
+              autoComplete="off"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="text"
+            />
+          </div>
+          <div className="flex-1">
+            <label
+              htmlFor="pid-id"
+              className="mb-1.5 block font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint"
+            >
+              Identifier
+            </label>
+            <input
+              id="pid-id"
+              name="identifier"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              className="w-full rounded-[2px] border border-rule bg-paper px-4 py-3 font-mono text-[14px] text-ink outline-none focus:border-oxblood focus:ring-[3px] focus:ring-oxblood/20"
+              placeholder="n79018049"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="text"
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              disabled={state.kind === "loading"}
+              className="tap-target w-full rounded-[2px] bg-ink px-6 py-3 font-mono text-[11px] uppercase tracking-eyebrow text-paper transition-colors hover:bg-oxblood focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper-deep disabled:opacity-60 sm:w-auto"
+              aria-label="Resolve identifier"
+            >
+              {state.kind === "loading" ? "Resolving…" : (
+                <>Resolve<span aria-hidden="true"> →</span></>
+              )}
+            </button>
+          </div>
         </form>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <p className="w-full mb-1 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
-            Or try one of these — all known references to Stephen King
-          </p>
+        <p
+          id="resolver-help"
+          className="mt-4 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint"
+        >
+          Paste a persistent identifier, or try one below — all reference Stephen King.
+        </p>
+
+        <div
+          role="group"
+          aria-label="Example identifiers"
+          className="mt-3 flex flex-wrap gap-2"
+        >
           {STARTER_CHIPS.map((chip) => (
             <button
               key={chip.curator + chip.id}
+              type="button"
               onClick={() => resolve(chip.curator, chip.id)}
-              className="rounded-[2px] border border-rule bg-paper px-3 py-1.5 font-mono text-[11px] text-ink transition-all hover:border-oxblood hover:text-oxblood"
+              className="rounded-[2px] border border-rule bg-paper px-3 py-1.5 font-mono text-[11px] text-ink transition-all hover:border-oxblood hover:text-oxblood focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper-deep"
+              aria-label={`Try ${chip.curator} identifier ${chip.label}`}
             >
               <span className="mr-2 text-ink-faint">{chip.curator.toLowerCase()}</span>
               {chip.label}
             </button>
           ))}
         </div>
+      </div>
+
+      {/* live region — screen readers hear resolution outcomes */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {state.kind === "loading" && "Resolving identifier…"}
+        {state.kind === "resolved" && `Resolved ${state.data.query.curator} ${state.data.query.id} to ${state.data.label ?? "an entity"} with ${state.data.sameAs.length} related identifiers.`}
+        {state.kind === "error" && `Resolution failed: ${state.error.message}`}
       </div>
 
       {/* resolved card */}
@@ -155,19 +198,28 @@ function ResolvedCard({
 }) {
   const toggle = (n: string) => setOpenNote(openNote === n ? null : n);
 
+  useEffect(() => {
+    if (!openNote) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenNote(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openNote, setOpenNote]);
+
   return (
     <div className="animate-fade-up overflow-hidden rounded-[2px] border border-rule bg-paper shadow-paper">
       {/* header strip */}
-      <div className="flex items-center justify-between bg-ink px-6 py-3.5 font-mono text-[10px] uppercase tracking-eyebrow text-paper">
-        <span>
+      <div className="flex flex-col gap-2 bg-ink px-5 py-3 font-mono text-[10px] uppercase tracking-eyebrow text-paper sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-3.5">
+        <span className="break-all">
           {data.wire.requestMethod} {prettyEndpointFor(data)} · {data.wire.responseStatus} OK
         </span>
         <span className="text-[#b8d4a8]">
-          ● resolved · source: {data.source}
+          <span aria-hidden="true">● </span>resolved · source: {data.source}
         </span>
       </div>
 
-      <div className="p-8">
+      <div className="p-5 sm:p-8">
         {/* label */}
         {data.label && (
           <div className="mb-6 border-b border-paper-edge pb-5">
@@ -186,7 +238,7 @@ function ResolvedCard({
           </Annotated>
         </Field>
 
-        <Annotation id="uri" open={openNote === "uri"} title="The URI on top of the identifiers">
+        <Annotation id="uri" open={openNote === "uri"} onClose={() => setOpenNote(null)} title="The URI on top of the identifiers">
           This URL is the meta-identifier — a single persistent reference that
           survives any one source catalog going dark, rebranding, or restructuring
           its identifier scheme. The Library of Congress could disappear tomorrow
@@ -208,7 +260,7 @@ function ResolvedCard({
           )}
         </Field>
 
-        <Annotation id="curator" open={openNote === "curator"} title="A curator is not a database. It is an obligation.">
+        <Annotation id="curator" open={openNote === "curator"} onClose={() => setOpenNote(null)} title="A curator is not a database. It is an obligation.">
           The OCLC PID Lookup API has a second endpoint{" "}
           <code className="font-mono text-[0.9em]">GET /v1/pid-lookup/curator</code>{" "}
           that returns metadata about <em>who</em> issued an identifier — the
@@ -236,7 +288,7 @@ function ResolvedCard({
           )}
         </Field>
 
-        <Annotation id="md5" open={openNote === "md5"} title="The fingerprint underneath the name">
+        <Annotation id="md5" open={openNote === "md5"} onClose={() => setOpenNote(null)} title="The fingerprint underneath the name">
           Every WorldCat entity is published with an MD5 hash of its own content,{" "}
           <em>computed by OCLC.</em> Change a single field on the entity — correct
           a birth year, add a pseudonym, merge in a duplicate — and OCLC
@@ -259,7 +311,7 @@ function ResolvedCard({
           </span>
         </Annotation>
 
-        <Annotation id="md5-absent" open={openNote === "md5-absent"} title="VIAF does not publish a content hash">
+        <Annotation id="md5-absent" open={openNote === "md5-absent"} onClose={() => setOpenNote(null)} title="VIAF does not publish a content hash">
           VIAF clusters are versioned by date, but the cluster record itself
           does not ship with a content fingerprint. To detect that a cluster
           has changed, a consumer must re-fetch and diff the whole record.
@@ -276,7 +328,7 @@ function ResolvedCard({
               {data.sameAs.map((s, i) => (
                 <li
                   key={i}
-                  className="grid grid-cols-[100px_1fr] gap-3 font-mono text-[12.5px]"
+                  className="grid grid-cols-[88px_1fr] gap-3 font-mono text-[12.5px] sm:grid-cols-[100px_1fr]"
                 >
                   <span className="pt-0.5 text-[10px] uppercase tracking-eyebrow text-oxblood">
                     {s.curator}
@@ -347,7 +399,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[140px_1fr] items-start gap-4 border-b border-paper-edge py-3.5 last:border-b-0">
+    <div className="flex flex-col gap-1 border-b border-paper-edge py-3.5 last:border-b-0 sm:grid sm:grid-cols-[140px_1fr] sm:items-start sm:gap-4">
       <div className="pt-1 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
         {label}
       </div>
@@ -372,9 +424,14 @@ function Annotated({
     <button
       type="button"
       onClick={() => setOpenNote(id)}
-      className={`cursor-pointer border-b border-dotted border-oxblood pb-0.5 text-left transition-colors hover:bg-oxblood/[.06] ${active ? "bg-oxblood/[.06]" : ""}`}
+      aria-expanded={active}
+      aria-controls={`note-${id}`}
+      className={`cursor-pointer border-b border-dotted border-oxblood pb-0.5 text-left transition-colors hover:bg-oxblood/[.06] focus-visible:bg-oxblood/[.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper ${active ? "bg-oxblood/[.06]" : ""}`}
     >
       {children}
+      <span className="sr-only">
+        {active ? " (annotation open, press Escape to close)" : " (open annotation)"}
+      </span>
     </button>
   );
 }
@@ -383,22 +440,39 @@ function Annotation({
   id,
   open,
   title,
+  onClose,
   children,
 }: {
   id: string;
   open: boolean;
   title: string;
+  onClose: () => void;
   children: React.ReactNode;
 }) {
   if (!open) return null;
   return (
     <div
       id={`note-${id}`}
-      className="my-5 animate-fade-up border-l-[3px] border-oxblood bg-paper-deep px-6 py-5 font-display text-[15.5px] leading-[1.6] text-ink-soft"
+      role="region"
+      aria-labelledby={`note-${id}-title`}
+      className="relative my-5 animate-fade-up border-l-[3px] border-oxblood bg-paper-deep px-5 py-5 font-display text-[15.5px] leading-[1.6] text-ink-soft sm:px-6"
     >
-      <h4 className="m-0 mb-2.5 font-display text-[14px] font-medium uppercase tracking-eyebrow text-oxblood">
-        {title}
-      </h4>
+      <div className="flex items-start justify-between gap-3">
+        <h4
+          id={`note-${id}-title`}
+          className="m-0 mb-2.5 font-display text-[14px] font-medium uppercase tracking-eyebrow text-oxblood"
+        >
+          {title}
+        </h4>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close annotation"
+          className="-mr-1 -mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[2px] font-mono text-[14px] text-ink-faint transition-colors hover:bg-paper hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
       <div>{children}</div>
     </div>
   );
