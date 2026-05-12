@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ConnectRecord, Neighbor, Relationship } from "@/lib/connect-records";
 
 /**
@@ -132,8 +134,10 @@ function RelationshipBlock({
 }
 
 function NeighborChip({ neighbor }: { neighbor: Neighbor }) {
-  return (
-    <li className="rounded-[2px] border border-rule bg-paper px-3 py-2.5">
+  const pathname = usePathname();
+  const walkable = Boolean(neighbor.wikidata);
+  const body = (
+    <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="font-display text-[15px] font-[400] text-ink">
           {neighbor.label}
@@ -160,6 +164,31 @@ function NeighborChip({ neighbor }: { neighbor: Neighbor }) {
           {neighbor.year}
         </p>
       )}
+      {walkable && (
+        <p className="mt-1 font-mono text-[9.5px] uppercase tracking-eyebrow text-ink-faint group-hover:text-oxblood">
+          Walk to neighborhood<span aria-hidden="true"> →</span>
+        </p>
+      )}
+    </>
+  );
+
+  if (walkable) {
+    return (
+      <li>
+        <Link
+          href={`${pathname}?q=${neighbor.wikidata}`}
+          scroll={false}
+          aria-label={`Walk to ${neighbor.label}'s neighborhood`}
+          className="group block rounded-[2px] border border-rule bg-paper px-3 py-2.5 transition-colors hover:border-oxblood focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-2 focus-visible:ring-offset-paper-deep"
+        >
+          {body}
+        </Link>
+      </li>
+    );
+  }
+  return (
+    <li className="rounded-[2px] border border-rule bg-paper px-3 py-2.5">
+      {body}
     </li>
   );
 }

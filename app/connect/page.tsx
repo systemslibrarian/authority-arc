@@ -6,16 +6,55 @@ import {
   HonestCapability,
 } from "@/components/shared/stage-page";
 import { Neighborhood } from "@/components/stage4/neighborhood";
-import { listConnectRecords } from "@/lib/connect-records";
+import { EntitySearch } from "@/components/stage4/entity-search";
+import {
+  listConnectRecords,
+  type ConnectRecord,
+} from "@/lib/connect-records";
+import { wikidataNeighborhood } from "@/lib/wikidata";
 
 export const metadata: Metadata = {
   title: "Connect",
   description:
-    "Stage 4 of the Authority Arc — authority data is a knowledge graph. Walk outward from one entity and read what each kind of edge actually asserts. The older institutional cousin of the graph work that modern systems quietly depend on.",
+    "Stage 4 of the Authority Arc — authority data is a knowledge graph. Walk outward from one entity, live, and read what each kind of edge actually asserts.",
 };
 
-export default function ConnectPage() {
-  const record = listConnectRecords()[0];
+// Stage 4 reads live data; tell Next to render this route per-request so
+// the SPARQL call runs on every visit (cached for 1h by lib/wikidata.ts).
+export const dynamic = "force-dynamic";
+
+export default async function ConnectPage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
+  const requestedId = (searchParams?.q ?? "Q39829").trim().toUpperCase();
+  // Prefer the curated record when one exists for this entity; otherwise
+  // hit Wikidata SPARQL live.
+  const curated = listConnectRecords().find(
+    (r) => r.entity.wikidata.toUpperCase() === requestedId
+  );
+  let record: ConnectRecord;
+  let liveError: string | null = null;
+  let isCurated = false;
+  if (curated) {
+    record = curated;
+    isCurated = true;
+  } else if (/^Q\d+$/.test(requestedId)) {
+    try {
+      record = await wikidataNeighborhood(requestedId);
+    } catch (err: any) {
+      // On upstream failure, fall back to the King fixture and surface
+      // the error as a banner inside the page.
+      record = listConnectRecords()[0];
+      isCurated = true;
+      liveError = `Wikidata SPARQL unreachable for ${requestedId} — showing the curated King neighborhood instead.`;
+    }
+  } else {
+    record = listConnectRecords()[0];
+    isCurated = true;
+    liveError = `"${requestedId}" is not a Wikidata Q-identifier — showing the curated King neighborhood.`;
+  }
   return (
     <StagePage
       num="04"
@@ -78,7 +117,7 @@ export default function ConnectPage() {
         heading={
           <>
             One entity,{" "}
-            <em className="italic text-oxblood">five kinds of edge</em>
+            <em className="italic text-oxblood">labeled edges</em>
           </>
         }
         intro={
@@ -87,35 +126,53 @@ export default function ConnectPage() {
             property, a curated set, or a derived overlap from Stage 3's
             FAST headings. Click any block to read what that edge type
             actually asserts and why the graph is sparse or dense there.
-            The point is to make the relationship's <em>meaning</em>{" "}
-            legible, not to render an impressive cloud of dots.
+            Each neighbor with a Wikidata ID is itself a doorway: click to
+            walk into <em>that</em> entity's neighborhood. Sparsely-edited
+            authors will render sparser views — the sparsity is the lesson.
           </>
         }
       >
+        <div className="mb-6">
+          <EntitySearch
+            currentId={record.entity.wikidata || requestedId}
+            isCurated={isCurated}
+          />
+        </div>
+        {liveError && (
+          <div
+            role="alert"
+            className="mb-6 rounded-[2px] border border-oxblood/40 bg-paper p-4"
+          >
+            <p className="font-mono text-[11px] uppercase tracking-eyebrow text-oxblood">
+              Live fallback engaged
+            </p>
+            <p className="mt-1 font-display text-[14px] text-ink">
+              {liveError}
+            </p>
+          </div>
+        )}
         <Neighborhood record={record} />
-        <p className="mt-5 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
-          <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-ochre" />
-          <span>Curated · Wikidata edges captured statically; live SPARQL fallback is on the roadmap</span>
-        </p>
       </Exhibit>
 
       {/* ─── HONEST CAPABILITY ──────────────────────────────────── */}
       <section className="mx-auto max-w-[1100px] px-5 pb-24 sm:px-7">
         <HonestCapability
           demonstrated={[
-            "Five distinct relationship types for one real entity, each labeled with the Wikidata property (or curated source) that backs it.",
+            "Live SPARQL against Wikidata's Query Service for any Q-identifier: notable works (P800), influenced by (P737), and works whose main subject is this entity (reverse-P921).",
+            "Curated King fixture overrides live mode and adds two extra relationship blocks (contemporaries, shared subjects) that are not directly queryable as single Wikidata predicates.",
             "Per-edge-type editorial notes explaining what that relationship asserts and why the graph is sparse or dense at that edge.",
-            "A closing 'sparsity note' that ties Stage 4 to the larger lesson: knowledge graphs are dense where attention has been invested and sparse elsewhere — sparsity is a signal, not a flaw.",
+            "Graph-walk traversal: each Wikidata-bearing neighbor is a doorway to its own neighborhood, with the URL state preserved so the walk is shareable.",
+            "A closing 'sparsity note' that ties Stage 4 to the larger lesson: knowledge graphs are dense where attention has been invested and sparse elsewhere — sparsity is a signal, not a flaw. Sparsely-edited entities now render visibly sparser views.",
           ]}
           aspirational={[
-            "That this entity's neighborhood is complete. It is a curated subset; Wikidata has dozens of additional properties for King (place of birth, residences, awards, family) that we did not surface in order to keep the lesson focused on the five kinds of edge that recur for any cultural figure.",
-            "That the visitor can walk to any of these neighbors and see their neighborhood in turn. That graph-walk traversal is on the roadmap; in this version each neighbor is a labeled chip, not a clickable next-step.",
+            "That any entity's neighborhood is complete. It is what Wikidata has indexed — many influences exist in biographies that never made it into the graph because they were not confirmed by the person themselves.",
+            "That live mode shows everything curated mode does. It does not — contemporaries and shared-subject overlaps are curated supplements unique to entities we have prepared (currently just King).",
             "That a generic 'graph explorer' would have been pedagogically equivalent. Generic force-directed graphs look impressive and obscure the meaning of edges; the labeled-edge-type framing is a deliberate constraint.",
           ]}
           faked={[
-            "The 'Contemporaries' set is curated rather than derived from a Wikidata query. There is no single property that means 'contemporary'; the catalog has to construct that relationship from birth-year + nationality + field.",
-            "The 'Subjects in common' set is illustrative — three high-signal overlaps, not a complete join. A real intersection would be tens of thousands of edges and would teach nothing about structure.",
-            "Live Wikidata SPARQL is not wired in this version; the curated path lets us pick pedagogically clear edges instead of accepting whatever the public graph happens to expose at any moment.",
+            "The 'Contemporaries' block on the curated King record is hand-picked rather than derived from a Wikidata query. There is no single property that means 'contemporary'; the catalog has to construct that relationship from birth-year + nationality + field.",
+            "The 'Subjects in common' block on the curated King record is illustrative — three high-signal overlaps, not a complete join. A real intersection of FAST headings would be tens of thousands of edges and would teach nothing about structure.",
+            "Editorial notes per relationship are condensed for legibility, not generated from the raw Wikidata schema. The properties (P800, P737, P921) are accurate; the framing of what each one asserts is ours.",
           ]}
         />
       </section>
