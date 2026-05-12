@@ -1,0 +1,168 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { WallOfIdentifiers } from "@/components/stage1/wall-of-identifiers";
+import { Resolver } from "@/components/stage1/resolver";
+import { HonestCapability } from "@/components/stage1/honest-capability";
+
+export const metadata: Metadata = {
+  title: "Identify",
+  description:
+    "Stage 1 of the Authority Arc — resolve any persistent identifier against VIAF and watch the cluster of references appear. The work of deciding when two strings refer to the same thing is older than the web.",
+};
+
+export default function IdentifyPage() {
+  return (
+    <main>
+      {/* ─── HERO ────────────────────────────────────────────────── */}
+      <section className="relative mx-auto max-w-[1100px] px-7 pb-16 pt-[90px]">
+        <div className="absolute right-7 top-[110px] hidden w-[200px] border-l-2 border-oxblood pl-3.5 font-mono text-[10.5px] leading-[1.7] tracking-[.04em] text-ink-faint md:block">
+          An identifier is not just a string. It is a string{" "}
+          <em className="italic">and</em> a curator. The same string means
+          different things to different keepers.
+        </div>
+
+        <p className="font-mono text-[12px] uppercase tracking-eyebrow text-oxblood">
+          <span className="text-ink-faint">§ 01 — </span>Stage One · Identify
+        </p>
+
+        <h1 className="mt-7 font-display text-[clamp(48px,7.5vw,92px)] font-[360] leading-[.96] tracking-[-0.025em]">
+          What is this <em className="italic text-oxblood">thing</em>, really?
+        </h1>
+
+        <p className="mt-7 max-w-[680px] font-display text-[clamp(19px,2.1vw,24px)] font-[320] leading-[1.5] text-ink-soft">
+          Every digital object in a library carries a fistful of identifiers —
+          an ISBN, an OCLC number, an LCCN, a VIAF cluster, a DOI, a Wikidata
+          Q-number, a local catalog ID. They all claim to point at the same
+          thing.{" "}
+          <em className="italic text-ink">
+            Most of the time, they do. Sometimes they don't. And the work of
+            deciding is older than the web.
+          </em>
+        </p>
+      </section>
+
+      {/* ─── EXHIBIT A: THE WALL ─────────────────────────────────── */}
+      <section className="mx-auto max-w-[1100px] px-7 pb-20">
+        <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-3.5">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+            Exhibit A
+          </span>
+          <h2 className="m-0 flex-1 font-display text-[28px] font-[380] tracking-[-0.01em]">
+            A single author,{" "}
+            <em className="italic text-oxblood">
+              and the cloud of names that points at him
+            </em>
+          </h2>
+        </div>
+        <p className="mb-10 max-w-[720px] font-display text-[18px] font-[320] leading-[1.55] text-ink-soft">
+          Stephen King has lived in catalogs for sixty years. Twenty-plus
+          national authorities maintain a record for him. Each one assigns its
+          own identifier — its own spelling, its own dates, its own MARC
+          encoding of "this is the same person." VIAF and OCLC's WorldCat
+          Entities API try to keep them in agreement.
+        </p>
+
+        <WallOfIdentifiers />
+
+        <p className="mt-5 text-center font-display text-[17px] italic text-ink-soft">
+          All of these point to{" "}
+          <strong className="font-normal not-italic text-oxblood">
+            one person
+          </strong>{" "}
+          — or are supposed to. The dashes are{" "}
+          <strong className="font-normal not-italic text-oxblood">
+            agreement
+          </strong>
+          . The red lines are where someone disagrees.
+        </p>
+      </section>
+
+      {/* ─── EXHIBIT B: RESOLVER ────────────────────────────────── */}
+      <section className="mx-auto max-w-[1100px] px-7 pb-20">
+        <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-3.5">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+            Exhibit B
+          </span>
+          <h2 className="m-0 flex-1 font-display text-[28px] font-[380] tracking-[-0.01em]">
+            Resolve any identifier —{" "}
+            <em className="italic text-oxblood">watch the others appear</em>
+          </h2>
+        </div>
+        <p className="mb-10 max-w-[720px] font-display text-[18px] font-[320] leading-[1.55] text-ink-soft">
+          Paste an identifier from any curator below. The request goes to VIAF,
+          which returns the cluster URI, the preferred heading, and every other
+          identifier VIAF knows about for the same entity. When OCLC's PID
+          Lookup API is provisioned, this same form will additionally return
+          the canonical WorldCat Entity URI and an MD5 content fingerprint.
+        </p>
+
+        <Resolver />
+      </section>
+
+      {/* ─── HONEST CAPABILITY ──────────────────────────────────── */}
+      <section className="mx-auto max-w-[1100px] px-7 pb-24">
+        <HonestCapability />
+      </section>
+
+      {/* ─── ESSAY ──────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-[720px] px-7 pb-32">
+        <div className="mb-6 font-mono text-[11px] uppercase tracking-eyebrow text-oxblood">
+          A note from the curator
+        </div>
+        <h2 className="m-0 mb-9 font-display text-[clamp(34px,5vw,56px)] font-[360] leading-[1.02] tracking-[-0.02em]">
+          An identifier is{" "}
+          <em className="italic text-oxblood">a contract</em>.
+        </h2>
+
+        <p className="font-display text-[19px] font-[320] leading-[1.65] text-ink first-line:tracking-wide">
+          <span className="float-left mr-2.5 pt-1 font-display text-[4.4em] font-[380] leading-[.85] text-oxblood">
+            T
+          </span>
+          he word <em className="italic text-ink-soft">identifier</em> sounds
+          passive — a label, a tag, a barcode — but every identifier in a
+          library is the visible end of a promise. Somebody, somewhere, has
+          agreed to keep resolving it. Without that promise, the string is
+          decoration.
+        </p>
+
+        <p className="mt-5 font-display text-[19px] font-[320] leading-[1.65] text-ink">
+          The Library of Congress promises to keep{" "}
+          <code className="font-mono text-[0.85em]">n79018049</code> pointing
+          at Stephen King. The Bibliothèque nationale de France makes the same
+          promise about <code className="font-mono text-[0.85em]">cb11909418n</code>. VIAF promises to keep its
+          cluster URI alive, and — here is the deeper promise — to maintain
+          the <em className="italic text-ink-soft">mapping</em> between all of
+          those national promises. When LC corrects a typo, VIAF notices. When
+          a pseudonym is finally linked to the author behind it, VIAF reflects
+          that. None of this is automatic. It is institutional labor performed
+          for decades, mostly invisibly, by people whose job titles do not say{" "}
+          <em className="italic text-ink-soft">"persistent identifier engineer."</em>
+        </p>
+
+        <hr className="my-10 border-none text-center text-ochre before:tracking-[1em] before:content-['✦__✦__✦']" />
+
+        <p className="mt-5 font-display text-[19px] font-[320] leading-[1.65] text-ink">
+          Stage 1 was the easy part: you point at a thing and the system points
+          back. Stage 2 is harder.{" "}
+          <em className="italic text-ink-soft">Which</em> Stephen King? There is
+          more than one, in the wider catalog. There are more than one of
+          nearly everyone. The discipline that resolves them — cluster by
+          cluster, evidence by evidence — is the next room of the museum.
+        </p>
+      </section>
+
+      {/* ─── TAIL ───────────────────────────────────────────────── */}
+      <footer className="border-t border-rule bg-paper-deep py-7">
+        <div className="mx-auto flex max-w-[1100px] items-center justify-between px-7 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+          <div>The Authority Arc · A systemslibrarian project</div>
+          <Link
+            href="/disambiguate"
+            className="text-oxblood transition-colors hover:text-oxblood-deep"
+          >
+            Next: Stage 02 — Disambiguate →
+          </Link>
+        </div>
+      </footer>
+    </main>
+  );
+}

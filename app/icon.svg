@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- paper background -->
+  <rect width="64" height="64" rx="6" fill="#f3eee4"/>
+  <!-- inscribed circle in oxblood, the ink center -->
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#6e1f1f" stroke-width="1.5" stroke-dasharray="2 3"/>
+  <circle cx="32" cy="32" r="9" fill="#1a1a24"/>
+  <!-- the small "sk" mark, paper-on-ink -->
+  <text x="32" y="36" font-family="Georgia, serif" font-style="italic" font-size="11" fill="#f3eee4" text-anchor="middle">A</text>
+</svg>

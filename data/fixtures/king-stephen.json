@@ -1,0 +1,28 @@
+{
+  "source": "viaf",
+  "canonicalUri": "http://viaf.org/viaf/27066711",
+  "query": {
+    "curator": "LC",
+    "curatorLabel": "Library of Congress / NACO",
+    "id": "n79018049"
+  },
+  "label": "King, Stephen, 1947-",
+  "nameType": "Personal",
+  "sameAs": [
+    { "curator": "DNB",      "curatorLabel": "German National Library",         "id": "118562525" },
+    { "curator": "BNF",      "curatorLabel": "National Library of France",      "id": "11909418" },
+    { "curator": "BNE",      "curatorLabel": "National Library of Spain",       "id": "XX1058570" },
+    { "curator": "NDL",      "curatorLabel": "National Diet Library, Japan",    "id": "00446920" },
+    { "curator": "NLA",      "curatorLabel": "National Library of Australia",   "id": "35867891" },
+    { "curator": "CAOONL",   "curatorLabel": "Library and Archives Canada",     "id": "ncf10358912" },
+    { "curator": "WIKIDATA", "curatorLabel": "Wikidata",                        "id": "Q39829" },
+    { "curator": "ISNI",     "curatorLabel": "International Standard Name Identifier", "id": "0000000121032683" },
+    { "curator": "FAST",     "curatorLabel": "FAST",                            "id": "41201" }
+  ],
+  "wire": {
+    "requestMethod": "GET",
+    "requestUrl": "https://viaf.org/viaf/sourceID/LC|n79018049",
+    "responseStatus": 200,
+    "fetchedAt": "2026-05-12T00:00:00Z"
+  }
+}

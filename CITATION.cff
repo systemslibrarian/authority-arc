@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+title: "The Authority Arc"
+message: "If you reference this project, please cite it as below."
+type: software
+authors:
+  - family-names: Clark
+    given-names: Paul
+    email: paul@systemslibrarian.dev
+    affiliation: "Leon County Public Library System"
+    website: "https://systemslibrarian.dev"
+repository-code: "https://github.com/systemslibrarian/authority-arc"
+url: "https://authorityarc.systemslibrarian.dev"
+abstract: >-
+  A five-stage interactive learning path through library identity, taught
+  through OCLC and VIAF public APIs. Covers identifier resolution,
+  authority disambiguation, classification, entity connections, and
+  metadata change tracking. Built to make the discipline of authority
+  control legible to software engineers, library science students, and
+  linked-data practitioners.
+keywords:
+  - authority control
+  - linked data
+  - VIAF
+  - OCLC
+  - identifier resolution
+  - library science
+  - educational
+license: CC-BY-NC-SA-4.0
