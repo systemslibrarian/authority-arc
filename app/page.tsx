@@ -13,7 +13,7 @@ const STAGES = [
   {
     num: "02",
     slug: "disambiguate",
-    title: "Disambiguate",
+    title: "Distinguish",
     pitch: "Which Stephen King?",
     blurb:
       "There are hundreds of Stephen Kings in the world's catalogs. The discipline that resolves them — cluster by cluster, evidence by evidence — is what every identity-resolution system reinvents from scratch.",
@@ -68,9 +68,10 @@ export default function Landing() {
           1 of 5 live
         </span>
       </p>
-      <h1 className="mt-7 max-w-[920px] font-display text-[clamp(48px,7.5vw,92px)] font-[360] leading-[.96] tracking-[-0.025em]">
-        How librarians solved <em className="italic text-oxblood">identity</em>,
-        decades before Big Tech tried.
+      <h1 className="mt-7 max-w-[920px] font-display text-[clamp(48px,7.5vw,92px)] font-[360] leading-[.9] tracking-[-0.035em]">
+        How librarians solved{" "}
+        <em className="italic text-oxblood">identity</em>, decades before Big
+        Tech tried.
       </h1>
       <p className="mt-7 max-w-[680px] font-display text-[clamp(19px,2.1vw,24px)] font-[320] leading-[1.5] text-ink-soft">
         Every digital object has many names. The work of keeping those names in

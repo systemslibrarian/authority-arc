@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s — The Authority Arc",
   },
   description:
-    "A five-stage learning path through library identity: identifier resolution, authority disambiguation, classification, entity connections, and metadata change tracking — taught through OCLC and VIAF.",
+    "A five-stage learning path through library identity: identifier resolution, telling near-duplicate records apart, classification, entity connections, and metadata change tracking — taught through OCLC and VIAF.",
   openGraph: {
     title: "The Authority Arc",
     description:
