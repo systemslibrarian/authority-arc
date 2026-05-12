@@ -1,0 +1,60 @@
+{
+  "id": "tchaikovsky-transliterations",
+  "kind": "merge",
+  "prompt": "Same person, or two?",
+  "leftRecord": {
+    "curator": "LC",
+    "curatorLabel": "Library of Congress / NACO",
+    "recordId": "n80018500",
+    "heading": "Tchaikovsky, Peter Ilich, 1840-1893",
+    "birthYear": "1840",
+    "deathYear": "1893",
+    "nationality": "Russian",
+    "field": "Composer (Romantic-era Russian)",
+    "knownFor": [
+      "Symphony No. 6 in B minor 'Pathétique'",
+      "Swan Lake (ballet, 1875–1876)",
+      "Eugene Onegin (opera, 1879)",
+      "Piano Concerto No. 1 in B-flat minor"
+    ],
+    "alternativeNames": [
+      "Tchaikovsky, P. I.",
+      "Tchaikovsky, Pyotr Ilyich",
+      "Tschaikowsky, Peter"
+    ]
+  },
+  "rightRecord": {
+    "curator": "DNB",
+    "curatorLabel": "Deutsche Nationalbibliothek",
+    "recordId": "118621777",
+    "heading": "Čajkovskij, Pëtr Il'ič, 1840-1893",
+    "birthYear": "1840",
+    "deathYear": "1893",
+    "nationality": "Russian",
+    "field": "Komponist (Romantik, russisch)",
+    "knownFor": [
+      "Sinfonie Nr. 6 h-Moll 'Pathétique'",
+      "Schwanensee (Ballett, 1875–1876)",
+      "Eugen Onegin (Oper, 1879)",
+      "Klavierkonzert Nr. 1 b-Moll"
+    ],
+    "alternativeNames": [
+      "Tschaikowski, Pjotr Iljitsch",
+      "Čajkovskij, P. I.",
+      "Tchaikovsky, Peter"
+    ]
+  },
+  "viafDecision": {
+    "answer": "merge",
+    "viafCluster": "40177743",
+    "preferredHeading": "Чайковский, Пётр Ильич, 1840-1893",
+    "evidence": [
+      "Identical birth and death years (1840, 1893) and identical nationality and field across both records.",
+      "Both records resolve to the same Russian-Cyrillic original name form: Пётр Ильич Чайковский.",
+      "LC uses ALA-LC romanization; DNB uses the ISO 9 scientific transliteration. The strings differ; the person does not.",
+      "Each record carries the other as a 4XX cross-reference (see-from): LC has 'Čajkovskij' as a non-preferred form; DNB has 'Tchaikovsky' as a non-preferred form.",
+      "VIAF cluster 40177743 unifies twenty-plus national-authority records, each using its own jurisdiction's transliteration convention while pointing at one identity."
+    ]
+  },
+  "explanation": "Transliteration is the quietest hard problem in authority work. The two strings above look like different people to anyone who reads only one alphabet — and the visitor's intuition that they might be different is exactly what makes this case pedagogically useful. The discipline has handled the multi-alphabet world by treating each transliteration as a non-preferred name form pointing at one canonical identity, usually in the source script (Cyrillic here). The catalog does not pretend a single Latin-script spelling is correct; it keeps all of them, each labeled with its rules of origin, and lets the cluster carry the consensus. Modern entity-resolution systems trained on Latin-only corpora still routinely fail this case — the discipline solved it in the mid-twentieth century, by acknowledging that the canonical form was the one no transliteration system would ever fully capture."
+}

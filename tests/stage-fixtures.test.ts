@@ -12,19 +12,21 @@ import { listMaintainRecords, getMaintainRecord, merkleizeRecord } from "@/lib/m
  */
 
 describe("disambiguation cases (Stage 2)", () => {
-  it("lists both curated cases", () => {
+  it("lists the three curated cases", () => {
     const cases = listDisambiguationCases();
-    expect(cases).toHaveLength(2);
+    expect(cases).toHaveLength(3);
     expect(cases.map((c) => c.id).sort()).toEqual([
+      "tchaikovsky-transliterations",
       "twain-clemens",
       "two-john-smiths",
     ]);
   });
 
-  it("provides one merge case and one split case", () => {
+  it("provides at least one merge case and at least one split case", () => {
     const cases = listDisambiguationCases();
-    const kinds = cases.map((c) => c.kind).sort();
-    expect(kinds).toEqual(["merge", "split"]);
+    const kinds = cases.map((c) => c.kind);
+    expect(kinds).toContain("merge");
+    expect(kinds).toContain("split");
   });
 
   it("includes at least three pieces of evidence per case", () => {
