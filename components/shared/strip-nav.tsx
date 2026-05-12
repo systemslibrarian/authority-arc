@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const STAGES = [
   { num: "01", slug: "identify",     label: "Identify" },
-  { num: "02", slug: "disambiguate", label: "Disambiguate" },
+  { num: "02", slug: "disambiguate", label: "Distinguish" },
   { num: "03", slug: "classify",     label: "Classify" },
   { num: "04", slug: "connect",      label: "Connect" },
   { num: "05", slug: "maintain",     label: "Maintain" },

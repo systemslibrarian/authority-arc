@@ -179,7 +179,7 @@ export default function IdentifyPage() {
             </span>
           </div>
           <h2 className="m-0 mt-3 font-display text-[clamp(26px,3.5vw,34px)] font-[380] leading-[1.1] tracking-[-0.015em] text-ink group-hover:text-oxblood">
-            Stage Two · Disambiguate —{" "}
+            Stage Two · Distinguish —{" "}
             <em className="italic text-oxblood">which Stephen King?</em>
           </h2>
           <p className="mt-3 font-display text-[16px] font-[320] leading-[1.55] text-ink-soft">
@@ -205,7 +205,7 @@ export default function IdentifyPage() {
             href="/disambiguate"
             className="rounded-[2px] text-oxblood transition-colors hover:text-oxblood-deep"
           >
-            Next: Stage 02 — Disambiguate<span aria-hidden="true"> →</span>
+            Next: Stage 02 — Distinguish<span aria-hidden="true"> →</span>
           </Link>
         </nav>
       </footer>

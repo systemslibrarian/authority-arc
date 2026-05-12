@@ -36,8 +36,8 @@ export default function ClassifyPage() {
       }
       intro={
         <>
-          A cluster is named. A person is disambiguated. Now: where does the
-          book they wrote sit?{" "}
+          A cluster is named. A person has been told apart from their
+          namesakes. Now: where does the book they wrote sit?{" "}
           <em className="italic text-ink">
             Dewey gives one number. FAST gives many access points. The
             difference between them is the difference between a tree and a
@@ -47,7 +47,7 @@ export default function ClassifyPage() {
           This room sets them next to each other for the same book.
         </>
       }
-      prev={{ slug: "disambiguate", num: "02", title: "Disambiguate" }}
+      prev={{ slug: "disambiguate", num: "02", title: "Distinguish" }}
       next={{ slug: "connect", num: "04", title: "Connect" }}
       continueCallout={
         <ContinueCallout

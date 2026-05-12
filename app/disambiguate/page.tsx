@@ -11,7 +11,7 @@ import { DisagreementTypes } from "@/components/stage2/disagreement-types";
 import { listDisambiguationCases } from "@/lib/disambiguation-cases";
 
 export const metadata: Metadata = {
-  title: "Disambiguate",
+  title: "Distinguish",
   description:
     "Stage 2 of the Authority Arc — when two records look alike, decide whether they describe the same person. When they look different, decide whether they still might. Taught with live VIAF AutoSuggest and two curated cases.",
 };
@@ -22,7 +22,7 @@ export default function DisambiguatePage() {
     <StagePage
       num="02"
       word="Two"
-      title="Disambiguate"
+      title="Distinguish"
       headline={
         <>
           Which <em className="italic text-oxblood">Stephen King</em>?
@@ -88,8 +88,8 @@ export default function DisambiguatePage() {
             endpoint, which returns the clusters it has on hand that prefix-
             match your query — ranked by VIAF's own scoring against the
             indexed name forms across forty-plus national authorities. Each
-            row is a candidate identity. You haven't disambiguated anyone
-            yet; you have only seen what the catalog could plausibly mean.
+            row is a candidate identity. You haven't decided anything yet —
+            you have only seen what the catalog could plausibly mean.
           </>
         }
         caption={
@@ -139,12 +139,12 @@ export default function DisambiguatePage() {
         <HonestCapability
           demonstrated={[
             "Live VIAF AutoSuggest queries with debounced typeahead, ARIA combobox semantics, and keyboard navigation.",
-            "Two curated disambiguation cases — Twain/Clemens (merge) and two different John Smiths (split) — with the actual evidence catalogers would cite.",
+            "Two curated cases — Twain/Clemens (merge) and two different John Smiths (split) — with the actual evidence catalogers would cite.",
             "Vote-then-reveal interaction that requires the visitor to commit to an answer before the reveal renders.",
             "An editorial field guide naming the recurring shapes of disagreement: pseudonym link, transliteration variant, contested dates, posthumous merge/split, anonymous attribution.",
           ]}
           aspirational={[
-            "That every disambiguation case has a single correct answer. In practice, many clusters carry an acknowledged probability of being wrong; VIAF documents the residual disagreement rather than pretending it resolved.",
+            "That every case shown here has a single correct answer. In practice, many clusters carry an acknowledged probability of being wrong; VIAF documents the residual disagreement rather than pretending it resolved.",
             "That AutoSuggest's ranking reflects truth. It reflects VIAF's confidence against indexed name forms — which is a function of how many authorities have already crosswalked a cluster, not whether the cluster is correct.",
             "That the field guide is exhaustive. It is a starting taxonomy; real catalogs carry edge cases (composite identities, institutional pseudonyms, attributed-pseudonymous works) that don't fit any of these.",
           ]}
@@ -162,7 +162,7 @@ export default function DisambiguatePage() {
           A note from the curator
         </div>
         <h2 className="m-0 mb-9 font-display text-[clamp(34px,5vw,56px)] font-[360] leading-[1.02] tracking-[-0.02em]">
-          Disambiguation is{" "}
+          The work is{" "}
           <em className="italic text-oxblood">a kept promise</em>, not a clean answer.
         </h2>
 

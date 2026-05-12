@@ -1,4 +1,5 @@
 import kingLedger from "@/data/fixtures/maintain/king-ledger.json";
+import { buildMerkleTree, serializeLedgerEntry, type MerkleProof } from "@/lib/merkle";
 
 /**
  * Maintenance ledger records — Stage 5.
@@ -54,4 +55,35 @@ export function listMaintainRecords(): MaintainRecord[] {
 
 export function getMaintainRecord(id: string): MaintainRecord | null {
   return RECORDS.find((r) => r.id === id) ?? null;
+}
+
+export interface MerkleizedEntry extends LedgerEntry {
+  merkleProof: MerkleProof;
+}
+
+export interface MerkleizedRecord {
+  record: MaintainRecord;
+  merkleRoot: string;
+  merkleAlgorithm: "sha-256";
+  entries: MerkleizedEntry[];
+}
+
+/**
+ * Take a maintain record and return it with a Merkle tree computed over
+ * its ledger entries. The root commits to every entry; each entry carries
+ * its own inclusion proof so the browser can re-verify.
+ *
+ * This is the working demonstration of the Stage 5 trust-layer proposal,
+ * applied to our own curated ledger. (The federated piece — multiple
+ * institutions co-signing a shared root — is the part Stage 5 still
+ * frames as a proposal.)
+ */
+export function merkleizeRecord(record: MaintainRecord): MerkleizedRecord {
+  const tree = buildMerkleTree(record.entries, serializeLedgerEntry);
+  return {
+    record,
+    merkleRoot: tree.root,
+    merkleAlgorithm: tree.algorithm,
+    entries: tree.leaves,
+  };
 }

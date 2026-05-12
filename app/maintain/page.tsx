@@ -5,7 +5,7 @@ import {
   HonestCapability,
 } from "@/components/shared/stage-page";
 import { Ledger } from "@/components/stage5/ledger";
-import { listMaintainRecords } from "@/lib/maintain-records";
+import { listMaintainRecords, merkleizeRecord } from "@/lib/maintain-records";
 
 export const metadata: Metadata = {
   title: "Maintain",
@@ -15,6 +15,9 @@ export const metadata: Metadata = {
 
 export default function MaintainPage() {
   const record = listMaintainRecords()[0];
+  // Build a Merkle tree over the ledger at render time — Stage 5's
+  // working demonstration of the trust-layer proposal.
+  const merkleized = merkleizeRecord(record);
   return (
     <StagePage
       num="05"
@@ -35,7 +38,7 @@ export default function MaintainPage() {
       intro={
         <>
           The four rooms before this taught how an identity is named,
-          disambiguated, classified, and connected.{" "}
+          told apart from its namesakes, classified, and connected.{" "}
           <em className="italic text-ink">
             This room is about what happens after — for decades — to keep
             that identity true.
@@ -70,11 +73,17 @@ export default function MaintainPage() {
           </>
         }
       >
-        <Ledger record={record} />
-        <p className="mt-4 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
-          <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-ochre" />
-          <span>Curated · entries are real change-types; specific dates are anchored where public and representative otherwise</span>
-        </p>
+        <Ledger record={merkleized} />
+        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-ochre" />
+            <span>Curated · entries are real change-types; specific dates are anchored where public and representative otherwise</span>
+          </p>
+          <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-[#5a7a3a]" />
+            <span>Live · Merkle root computed at build, verified in browser via SubtleCrypto</span>
+          </p>
+        </div>
         <p className="mt-6 max-w-[760px] border-l-[3px] border-paper-edge pl-5 font-display text-[15.5px] italic leading-[1.6] text-ink-soft">
           {record.stewardshipNote}
         </p>
@@ -117,6 +126,7 @@ export default function MaintainPage() {
             label="02"
             heading="Merkle-rooted history"
             body="The ledger of changes is committed to a Merkle tree, with each new entry chained to the previous root hash. A consumer holding a recent root can prove that any earlier entry has not been silently rewritten — and the cluster's history becomes auditable end-to-end with the storage cost of a single hash."
+            demonstrated="Demonstrated above on Authority Arc's own ledger — try the verify button on any entry."
           />
           <TrustPillar
             label="03"
@@ -144,17 +154,18 @@ export default function MaintainPage() {
           demonstrated={[
             "A curated stewardship ledger for one real authority cluster, showing the kinds of changes that real catalog records undergo over their lifetime.",
             "Editorial notes per entry on *why* each change type matters — what it preserves, who acted, and what the institutional logic of the move was.",
-            "A clear framing of what a verifiable trust layer over this stewardship would actually require: signed change manifests, Merkle-rooted histories, replicated commitments.",
+            "A working Merkle tree over the ledger: the root is computed at build time over the canonical serialization of every entry; each entry carries its sibling-hash inclusion proof; the browser re-verifies via SubtleCrypto on click. This is the second pillar of the trust-layer proposal, applied to our own data.",
+            "A clear framing of what a federated verifiable trust layer over real institutional stewardship would additionally require: signed change manifests, replicated co-signed commitments.",
           ]}
           aspirational={[
             "That the dates shown are the exact dates each event happened. Specific events anchored to public facts (e.g. King's 1985 acknowledgment of Bachman) are accurate; others are representative ranges.",
-            "That signed change manifests exist today in the bibliographic universe. They do not — VIAF and OCLC ship records but not signatures. The trust-layer section is a forward-looking proposal, not a description of the status quo.",
+            "That signed change manifests and federated peer commitments exist today in the bibliographic universe. They do not — VIAF and OCLC ship records but not signatures. The first and third trust-layer pillars remain a forward-looking proposal; only the Merkle-rooted history pillar is demonstrated here, and only over Authority Arc's own curated ledger.",
             "That cryptographic stewardship would replace institutional stewardship. It would not. It would let institutional stewardship be *checkable* without requiring the consumer to trust the host on faith.",
           ]}
           faked={[
             "Specific year-precise dates on the ledger entries are anchored where the underlying event is public (1985 pseudonym reveal, 2003 VIAF launch, 2012 Wikidata launch) and are illustrative otherwise. The change-types are accurate; some calendar-year placements are representative.",
-            "OCLC's published entityMd5 is real (visible on every Entities API response); the cryptographic shortcomings explained in Stage 1 are accurate. The proposed signing scheme is editorial — there is no production deployment of signed authority manifests as of this writing.",
-            "The trust-layer section is a proposal, not a build. The cryptographic primitives are well-understood; the institutional deployment is the missing piece, and pretending otherwise would betray the honest-capability framing the rest of the arc has tried to keep.",
+            "OCLC's published entityMd5 is real (visible on every Entities API response); the cryptographic shortcomings explained in Stage 1 are accurate. The signed-manifest and federated-replication pillars are editorial — there is no production deployment of signed authority manifests at OCLC or VIAF as of this writing.",
+            "The Merkle root demonstration runs over Authority Arc's own curated ledger, not over real-time edits to VIAF. The primitive is real (SHA-256, standard Merkle proofs, browser-side SubtleCrypto verification); the analogue at OCLC/VIAF scale is the proposal the rest of the trust-layer section frames.",
           ]}
         />
       </section>
@@ -233,13 +244,21 @@ function TrustPillar({
   label,
   heading,
   body,
+  demonstrated,
 }: {
   label: string;
   heading: string;
   body: string;
+  /** If present, a "working demonstration" badge sits on the pillar. */
+  demonstrated?: string;
 }) {
   return (
-    <article className="rounded-[2px] border border-paper-edge bg-paper-deep p-5 shadow-paper">
+    <article
+      className={
+        "relative rounded-[2px] border bg-paper-deep p-5 shadow-paper " +
+        (demonstrated ? "border-[#5a7a3a]" : "border-paper-edge")
+      }
+    >
       <div className="flex items-baseline gap-3">
         <span className="font-mono text-[24px] font-[320] text-oxblood">
           {label}
@@ -251,6 +270,12 @@ function TrustPillar({
       <p className="mt-3 font-display text-[14.5px] leading-[1.55] text-ink-soft">
         {body}
       </p>
+      {demonstrated && (
+        <p className="mt-3 inline-flex items-center gap-2 rounded-[2px] border border-[#5a7a3a] bg-paper px-2 py-1 font-mono text-[9.5px] uppercase tracking-eyebrow text-[#3f5a2a]">
+          <span aria-hidden="true">●</span>
+          <span>{demonstrated}</span>
+        </p>
+      )}
     </article>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { viafLookup } from "@/lib/viaf";
+import { viafLookup, viafAutoSuggest } from "@/lib/viaf";
 
 /**
  * VIAF client unit tests.
@@ -149,5 +149,80 @@ describe("lib/viaf", () => {
     const result = await viafLookup({ curator: "DNB", id: "nonexistent" });
     expect(result.sameAs.length).toBeGreaterThanOrEqual(1);
     expect(result.sameAs[0].curator).toBe("LC");
+  });
+
+  describe("viafAutoSuggest", () => {
+    it("returns an empty hit set on an empty query without hitting the network", async () => {
+      const res = await viafAutoSuggest("");
+      expect(res.hits).toEqual([]);
+      expect((global.fetch as any).mock?.calls?.length ?? 0).toBe(0);
+    });
+
+    it("normalizes a typical AutoSuggest response to AutoSuggestHit[]", async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          query: "stephen king",
+          result: [
+            {
+              viafid: "27066711",
+              displayForm: "King, Stephen, 1947-",
+              nametype: "personal",
+              lc: "n79018049",
+              wkp: "Q39829",
+              dnb: ["118562525"], // arrays should be flattened
+              bnf: "11909418",
+            },
+            {
+              recordID: "5678",
+              term: "Older Heading",
+              nametype: "personal",
+            },
+          ],
+        }),
+      });
+      const res = await viafAutoSuggest("stephen king");
+      expect(res.hits).toHaveLength(2);
+      expect(res.hits[0]).toMatchObject({
+        viafId: "27066711",
+        label: "King, Stephen, 1947-",
+        nameType: "personal",
+      });
+      expect(res.hits[0].identifiers?.lc).toBe("n79018049");
+      expect(res.hits[0].identifiers?.dnb).toBe("118562525");
+      expect(res.hits[1].viafId).toBe("5678");
+      expect(res.hits[1].label).toBe("Older Heading");
+    });
+
+    it("drops hits missing a viafid or label", async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          query: "x",
+          result: [
+            { displayForm: "no viaf id, dropped" },
+            { viafid: "123" /* no label, dropped */ },
+            { viafid: "999", displayForm: "Kept" },
+          ],
+        }),
+      });
+      const res = await viafAutoSuggest("x");
+      expect(res.hits).toHaveLength(1);
+      expect(res.hits[0].label).toBe("Kept");
+    });
+
+    it("raises UPSTREAM_ERROR on non-2xx", async () => {
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({}),
+      });
+      await expect(viafAutoSuggest("anything")).rejects.toMatchObject({
+        code: "UPSTREAM_ERROR",
+        status: 503,
+      });
+    });
   });
 });
