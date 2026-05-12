@@ -75,8 +75,32 @@ export default function RootLayout({
         <div className="relative z-10">
           <StripNav />
           {children}
+          <SiteDedication />
         </div>
       </body>
     </html>
+  );
+}
+
+/**
+ * Standard site dedication. A small scriptural footer appearing under every
+ * page, below each page's own nav-footer. Mono, italic, deliberately quiet.
+ */
+function SiteDedication() {
+  return (
+    <aside
+      aria-label="Site dedication"
+      className="border-t border-rule bg-paper py-5"
+    >
+      <div className="mx-auto max-w-[1100px] px-5 text-center font-display sm:px-7">
+        <p className="m-0 italic text-[13px] leading-[1.55] text-ink-faint">
+          “Whether therefore ye eat, or drink, or whatsoever ye do, do all to
+          the glory of God.”
+        </p>
+        <p className="mt-1 font-mono text-[9.5px] uppercase tracking-eyebrow text-ink-faint not-italic">
+          1 Corinthians 10:31
+        </p>
+      </div>
+    </aside>
   );
 }

@@ -1,0 +1,79 @@
+{
+  "id": "stephen-king",
+  "entity": {
+    "name": "Stephen King",
+    "wikidata": "Q39829",
+    "viaf": "27066711",
+    "lc": "n79018049",
+    "birthYear": "1947",
+    "deathYear": null,
+    "summary": "American author, primarily of horror, supernatural fiction, suspense, crime, science fiction, and fantasy."
+  },
+  "relationships": [
+    {
+      "type": "notable-work",
+      "title": "Notable works",
+      "predicate": "Wikidata P800 · notable work",
+      "explanation": "Wikidata's P800 records 'notable work' edges from a person to a work — a one-way relation that names the work as something the editing community considers central to the person's identity. It does not promise completeness; King has written far more than this list, and the choice of which works are 'notable' is itself a curated decision made by Wikidata editors. The relationship is dense for prolific authors and sparse for, say, a working musician with one breakthrough record.",
+      "neighbors": [
+        { "label": "Carrie", "wikidata": "Q1037498", "year": "1974" },
+        { "label": "The Shining", "wikidata": "Q220882", "year": "1977" },
+        { "label": "The Stand", "wikidata": "Q1056413", "year": "1978" },
+        { "label": "It", "wikidata": "Q272414", "year": "1986" },
+        { "label": "Misery", "wikidata": "Q909477", "year": "1987" },
+        { "label": "The Dark Tower", "wikidata": "Q638041", "year": "1982–2012" },
+        { "label": "11/22/63", "wikidata": "Q2126017", "year": "2011" },
+        { "label": "Pet Sematary", "wikidata": "Q987518", "year": "1983" }
+      ]
+    },
+    {
+      "type": "influenced-by",
+      "title": "Influenced by",
+      "predicate": "Wikidata P737 · influenced by",
+      "explanation": "P737 is the most contested relationship in Wikidata. It asserts a direct intellectual debt from one person to another. The edges shown here are documented from King's own published statements (essays, interviews, On Writing). For most authors the relationship is *underspecified* — biographers can usually name ten plausible influences, but only the ones the author confirms become P737 edges. The graph is therefore sparse not because the influence wasn't there, but because the confirmation wasn't.",
+      "neighbors": [
+        { "label": "H. P. Lovecraft", "wikidata": "Q1077", "note": "Cosmic horror, mood, the indifferent universe." },
+        { "label": "Richard Matheson", "wikidata": "Q316313", "note": "I Am Legend — King has named this as the modern horror novel he most reread as a teenager." },
+        { "label": "Shirley Jackson", "wikidata": "Q190050", "note": "The Haunting of Hill House — King has said his understanding of psychological horror in The Shining traces directly to Jackson." },
+        { "label": "Ray Bradbury", "wikidata": "Q40640", "note": "Something Wicked This Way Comes — small-town horror as American mode." },
+        { "label": "Edgar Allan Poe", "wikidata": "Q16867", "note": "The named ancestor of the genre King would later occupy." }
+      ]
+    },
+    {
+      "type": "contemporaries",
+      "title": "Contemporaries",
+      "predicate": "Curated · same period and field",
+      "explanation": "There is no single Wikidata property for 'contemporary' — it is a relationship the catalog has to construct from birth year, nationality, and field. This list selects authors born within ±15 years of King, writing in English, primarily in the horror/thriller/dark-fiction zone. The relationship is bidirectional but asymmetric in influence: some of these names are roughly peers; some treat King as a forerunner; some treat him as a contemporary they explicitly distinguish themselves from.",
+      "neighbors": [
+        { "label": "Anne Rice", "wikidata": "Q187019", "note": "b. 1941 · Interview with the Vampire (1976)." },
+        { "label": "Peter Straub", "wikidata": "Q707088", "note": "b. 1943 · co-authored The Talisman and Black House with King." },
+        { "label": "Clive Barker", "wikidata": "Q310201", "note": "b. 1952 · Books of Blood (1984)." },
+        { "label": "Dean Koontz", "wikidata": "Q179691", "note": "b. 1945 · prolific suspense/horror across the same decades." },
+        { "label": "Joyce Carol Oates", "wikidata": "Q231019", "note": "b. 1938 · gothic and psychological terrain that overlaps King's." }
+      ]
+    },
+    {
+      "type": "subject-of",
+      "title": "Subject of",
+      "predicate": "Wikidata reverse-link · works about this person",
+      "explanation": "The reverse of P800: works whose Wikidata 'main subject' (P921) is the person. This is where the graph becomes self-referential — biographies, critical studies, documentary films. The density of this edge is a rough proxy for how thoroughly someone has been canonized; figures whose work has been studied have many edges here, working musicians and journalists usually have few. The graph is sparse on living non-academic figures and dense on the dead.",
+      "neighbors": [
+        { "label": "Stephen King: A Literary Companion", "type": "Reference work", "year": "2011" },
+        { "label": "Hollywood's Stephen King", "type": "Critical study", "year": "2003" },
+        { "label": "On Writing", "type": "Autobiography (King himself)", "year": "2000" }
+      ]
+    },
+    {
+      "type": "shared-subjects",
+      "title": "Subjects in common",
+      "predicate": "Curated · FAST topical overlap with adjacent authors",
+      "explanation": "What other entities share the same FAST topical headings? This is the access-point view of Stage 3 turned outward: 'Horror tales' is a FAST heading that connects King to thousands of other works and authors. The graph here is intentionally narrow — three high-confidence subjects with one neighbor each — because the full join would be tens of thousands of edges and would teach nothing about the structure.",
+      "neighbors": [
+        { "label": "Horror tales — H. P. Lovecraft", "fastId": "fst00978999" },
+        { "label": "Maine — fiction set there — Carolyn Chute", "fastId": "fst01204528" },
+        { "label": "Small towns — fiction — Shirley Jackson", "fastId": "fst01122467" }
+      ]
+    }
+  ],
+  "sparsityNote": "Knowledge graphs do not fail uniformly. They are dense where the editing community has invested — popular authors, canonical figures, broad-interest topics — and sparse where attention is missing. The graph you are looking at is mid-density: rich on works and influences (because King's career is well-documented), thin on family and biographical detail (because Wikidata's editing community on King has prioritized literary edges over personal ones). A graph for a less-canonized author of the same era would look much sparser. Sparsity is therefore not an artifact of the technology — it is a signal of *who has been studied*."
+}

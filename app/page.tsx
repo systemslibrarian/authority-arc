@@ -83,17 +83,6 @@ export default function Landing() {
         </em>
       </p>
 
-      {/* ─── SCRIPTURE EPIGRAPH ─────────────────────────────────────── */}
-      <figure className="mt-16 max-w-[680px] border-l-2 border-oxblood pl-6">
-        <blockquote className="font-display text-[19px] font-[320] italic leading-[1.55] text-ink">
-          He determines the number of the stars; he gives to all of them their
-          names.
-        </blockquote>
-        <figcaption className="mt-2 font-mono text-[11px] uppercase tracking-eyebrow text-ink-faint">
-          — Psalm 147:4 (ESV)
-        </figcaption>
-      </figure>
-
       {/* ─── THE FIVE STAGES ────────────────────────────────────────── */}
       <section className="mt-24">
         <div className="mb-3 max-w-[760px]">

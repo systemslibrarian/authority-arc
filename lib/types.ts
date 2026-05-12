@@ -70,6 +70,34 @@ export interface ResolveError {
   message: string;
 }
 
+/** A single hit from VIAF's AutoSuggest endpoint, normalized. */
+export interface AutoSuggestHit {
+  /** VIAF cluster id, e.g. "27066711". */
+  viafId: string;
+  /** The matched display label, e.g. "King, Stephen, 1947-". */
+  label: string;
+  /** "personal", "corporate", "geographic", "work", "expression", etc. */
+  nameType?: string;
+  /** Optional well-known curator ids on this cluster, useful for previews. */
+  identifiers?: {
+    lc?: string;
+    wikidata?: string;
+    dnb?: string;
+    bnf?: string;
+    fast?: string;
+  };
+}
+
+export interface AutoSuggestResponse {
+  query: string;
+  hits: AutoSuggestHit[];
+  wire: {
+    requestUrl: string;
+    responseStatus: number;
+    fetchedAt: string;
+  };
+}
+
 /** Curator metadata returned by /api/curator/[code]. */
 export interface CuratorInfo {
   code: string;
