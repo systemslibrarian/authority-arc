@@ -1,12 +1,16 @@
 import twainClemens from "@/data/fixtures/disambiguation/twain-clemens.json";
 import twoJohnSmiths from "@/data/fixtures/disambiguation/two-john-smiths.json";
+import tchaikovsky from "@/data/fixtures/disambiguation/tchaikovsky-transliterations.json";
 
 /**
  * Disambiguation cases.
  *
- * Two curated cases anchor Stage 2's vote-then-reveal:
- *   - merge: Twain / Clemens — same person, name-form pseudonym.
- *   - split: two different "John Smith"s — physically separate people.
+ * Three curated cases anchor Stage 2's vote-then-reveal, one per shape:
+ *   - merge: Twain / Clemens — same person, voluntary pseudonym.
+ *   - merge: Tchaikovsky transliterations — same person, different scripts /
+ *     transliteration systems.
+ *   - split: two different "John Smith"s — physically separate people, same
+ *     name string.
  *
  * Both are real authority records; the evidence lists are summarized from
  * the actual LC and VIAF entries. The cases are versioned in /data/fixtures
@@ -54,6 +58,7 @@ export interface DisambiguationCase {
 
 const CASES: DisambiguationCase[] = [
   twainClemens as DisambiguationCase,
+  tchaikovsky as DisambiguationCase,
   twoJohnSmiths as DisambiguationCase,
 ];
 

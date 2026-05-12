@@ -13,7 +13,7 @@ import { listDisambiguationCases } from "@/lib/disambiguation-cases";
 export const metadata: Metadata = {
   title: "Distinguish",
   description:
-    "Stage 2 of the Authority Arc — when two records look alike, decide whether they describe the same person. When they look different, decide whether they still might. Taught with live VIAF AutoSuggest and two curated cases.",
+    "Stage 2 of the Authority Arc — when two records look alike, decide whether they describe the same person. When they look different, decide whether they still might. Taught with live VIAF AutoSuggest and three curated cases.",
 };
 
 export default function DisambiguatePage({
@@ -122,7 +122,8 @@ export default function DisambiguatePage({
         }
         intro={
           <>
-            Two curated cases — one pseudonym, one same-name. For each, you
+            Three curated cases — a pseudonym merge, a cross-script
+            transliteration merge, and a same-string split. For each, you
             see two authority records as a cataloger would: heading, dates,
             field, known works. Commit to an answer before reading the
             reveal; the lesson sticks only if you have already chosen.
@@ -144,7 +145,7 @@ export default function DisambiguatePage({
         <HonestCapability
           demonstrated={[
             "Live VIAF AutoSuggest queries with debounced typeahead, ARIA combobox semantics, and keyboard navigation.",
-            "Two curated cases — Twain/Clemens (merge) and two different John Smiths (split) — with the actual evidence catalogers would cite.",
+            "Three curated cases — Twain/Clemens (pseudonym merge), Tchaikovsky transliterations (cross-script merge), and two different John Smiths (split) — each with the actual evidence catalogers would cite.",
             "Vote-then-reveal interaction that requires the visitor to commit to an answer before the reveal renders.",
             "An editorial field guide naming the recurring shapes of disagreement: pseudonym link, transliteration variant, contested dates, posthumous merge/split, anonymous attribution.",
           ]}
@@ -154,7 +155,7 @@ export default function DisambiguatePage({
             "That the field guide is exhaustive. It is a starting taxonomy; real catalogs carry edge cases (composite identities, institutional pseudonyms, attributed-pseudonymous works) that don't fit any of these.",
           ]}
           faked={[
-            "The two curated cases use illustrative record IDs and a summarized evidence list, not raw MARC dumps. The decisions and life-date data are accurate to the real records; the rendering is a museum placard, not a cataloger's worksheet.",
+            "The three curated cases use illustrative record IDs and a summarized evidence list, not raw MARC dumps. The decisions, life-date data, and transliteration systems are accurate to the real records; the rendering is a museum placard, not a cataloger's worksheet.",
             "The 'painter John Smith' record (n79139831) is representative rather than a specific historical figure — there are several 19th-century painters named John Smith in LC; this card is composited from the demographic shape they share.",
             "Real LC authority records do not include a 'Field' line as such; that label is condensed from the 670-source citations and 678-biographical/historical notes for legibility.",
           ]}
