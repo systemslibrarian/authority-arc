@@ -1,5 +1,44 @@
 import Link from "next/link";
 
+const AUDIENCES = [
+  {
+    audience: "A software engineer",
+    title: "You have built or maintained an identity-resolution system.",
+    pitch:
+      "Start at Stage 01. Watch a free public API do, in production, what most modern systems try to rebuild from scratch — and see what its persistence guarantee actually rests on.",
+    slug: "identify",
+    num: "01",
+    cta: "Resolve an identifier live",
+  },
+  {
+    audience: "An AI / ML / RAG person",
+    title: "You work on entity resolution, knowledge graphs, or retrieval.",
+    pitch:
+      "Start at Stage 02. Library catalogers have been disambiguating same-name entities longer than most retrieval systems have existed — including the cases your training data still gets wrong.",
+    slug: "disambiguate",
+    num: "02",
+    cta: "See two records, vote, then read the evidence",
+  },
+  {
+    audience: "A library or information science student",
+    title: "You have read about authority control but never touched the APIs.",
+    pitch:
+      "Start at Stage 01 and walk forward. Each room is a live working interactive with the actual data your textbooks describe.",
+    slug: "identify",
+    num: "01",
+    cta: "Walk the full arc",
+  },
+  {
+    audience: "A linked-data or semantic-web practitioner",
+    title: "You work with SPARQL, RDF, FAST, or VIAF already.",
+    pitch:
+      "Start at Stage 04 — a live Wikidata SPARQL walk grounded in labeled edge-types, with explicit framing of what each predicate asserts and where the graph is sparse for reasons of attention.",
+    slug: "connect",
+    num: "04",
+    cta: "Walk Wikidata live",
+  },
+];
+
 const STAGES = [
   {
     num: "01",
@@ -83,6 +122,45 @@ export default function Landing() {
           This is a walking tour of how.
         </em>
       </p>
+
+      {/* ─── AUDIENCE ROUTER ────────────────────────────────────────── */}
+      <section aria-label="Start here" className="mt-20">
+        <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-4">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre-deep">
+            Start here
+          </span>
+          <h2 className="m-0 flex-1 font-display text-[28px] font-[380] tracking-[-0.01em]">
+            …if you are.
+          </h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          {AUDIENCES.map((a) => (
+            <Link
+              key={a.slug}
+              href={`/${a.slug}`}
+              className="group block rounded-[2px] border border-rule bg-paper-deep p-5 shadow-paper transition-colors hover:border-oxblood sm:p-6"
+            >
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-eyebrow text-ochre-deep">
+                  {a.audience}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+                  Start at § {a.num}
+                </span>
+              </div>
+              <h3 className="m-0 mt-2 font-display text-[20px] font-[400] leading-[1.2] tracking-[-0.01em] text-ink group-hover:text-oxblood">
+                {a.title}
+              </h3>
+              <p className="mt-2 font-display text-[14.5px] font-[320] leading-[1.55] text-ink-soft">
+                {a.pitch}
+              </p>
+              <p className="mt-3 font-mono text-[10.5px] uppercase tracking-eyebrow text-oxblood">
+                {a.cta}<span aria-hidden="true"> →</span>
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* ─── THE FIVE STAGES ────────────────────────────────────────── */}
       <section className="mt-24">
