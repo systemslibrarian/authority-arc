@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function IdentifyPage() {
   return (
-    <main>
+    <main id="main-content">
       {/* ─── HERO ────────────────────────────────────────────────── */}
-      <section className="relative mx-auto max-w-[1100px] px-7 pb-16 pt-[90px]">
+      <section className="relative mx-auto max-w-[1100px] px-5 pb-12 pt-12 sm:px-7 sm:pb-16 sm:pt-[90px]">
         <div className="absolute right-7 top-[110px] hidden w-[200px] border-l-2 border-oxblood pl-3.5 font-mono text-[10.5px] leading-[1.7] tracking-[.04em] text-ink-faint md:block">
           An identifier is not just a string. It is a string{" "}
           <em className="italic">and</em> a curator. The same string means
@@ -42,9 +42,9 @@ export default function IdentifyPage() {
       </section>
 
       {/* ─── EXHIBIT A: THE WALL ─────────────────────────────────── */}
-      <section className="mx-auto max-w-[1100px] px-7 pb-20">
+      <section className="mx-auto max-w-[1100px] px-5 pb-16 sm:px-7 sm:pb-20">
         <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-3.5">
-          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre-deep">
             Exhibit A
           </span>
           <h2 className="m-0 flex-1 font-display text-[28px] font-[380] tracking-[-0.01em]">
@@ -78,9 +78,9 @@ export default function IdentifyPage() {
       </section>
 
       {/* ─── EXHIBIT B: RESOLVER ────────────────────────────────── */}
-      <section className="mx-auto max-w-[1100px] px-7 pb-20">
+      <section className="mx-auto max-w-[1100px] px-5 pb-16 sm:px-7 sm:pb-20">
         <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-3.5">
-          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre-deep">
             Exhibit B
           </span>
           <h2 className="m-0 flex-1 font-display text-[28px] font-[380] tracking-[-0.01em]">
@@ -100,7 +100,7 @@ export default function IdentifyPage() {
       </section>
 
       {/* ─── HONEST CAPABILITY ──────────────────────────────────── */}
-      <section className="mx-auto max-w-[1100px] px-7 pb-24">
+      <section className="mx-auto max-w-[1100px] px-5 sm:px-7 pb-24">
         <HonestCapability />
       </section>
 
@@ -139,7 +139,7 @@ export default function IdentifyPage() {
           <em className="italic text-ink-soft">"persistent identifier engineer."</em>
         </p>
 
-        <hr className="my-10 border-none text-center text-ochre before:tracking-[1em] before:content-['✦__✦__✦']" />
+        <hr className="my-10 border-none text-center text-ochre-deep before:tracking-[1em] before:content-['✦__✦__✦']" />
 
         <p className="mt-5 font-display text-[19px] font-[320] leading-[1.65] text-ink">
           Stage 1 was the easy part: you point at a thing and the system points
@@ -153,15 +153,18 @@ export default function IdentifyPage() {
 
       {/* ─── TAIL ───────────────────────────────────────────────── */}
       <footer className="border-t border-rule bg-paper-deep py-7">
-        <div className="mx-auto flex max-w-[1100px] items-center justify-between px-7 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+        <nav
+          aria-label="Stage navigation"
+          className="mx-auto flex max-w-[1100px] flex-col items-start justify-between gap-3 px-5 font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint sm:flex-row sm:items-center sm:px-7"
+        >
           <div>The Authority Arc · A systemslibrarian project</div>
           <Link
             href="/disambiguate"
-            className="text-oxblood transition-colors hover:text-oxblood-deep"
+            className="rounded-[2px] text-oxblood transition-colors hover:text-oxblood-deep"
           >
-            Next: Stage 02 — Disambiguate →
+            Next: Stage 02 — Disambiguate<span aria-hidden="true"> →</span>
           </Link>
-        </div>
+        </nav>
       </footer>
     </main>
   );

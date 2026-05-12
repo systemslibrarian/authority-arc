@@ -17,7 +17,7 @@ export function HonestCapability() {
   return (
     <section className="mt-24 border-t border-rule pt-12">
       <div className="mb-8 flex items-baseline gap-6 border-b border-rule pb-4">
-        <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+        <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre-deep">
           Honest Capability
         </span>
         <h3 className="m-0 flex-1 font-display text-[24px] font-[380] tracking-[-0.01em]">

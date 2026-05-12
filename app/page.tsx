@@ -50,7 +50,7 @@ const STAGES = [
 
 export default function Landing() {
   return (
-    <main className="mx-auto max-w-[1100px] px-7 pb-32 pt-[90px]">
+    <main id="main-content" className="mx-auto max-w-[1100px] px-5 pb-24 pt-12 sm:px-7 sm:pb-32 sm:pt-[90px]">
       {/* ─── HERO ───────────────────────────────────────────────────── */}
       <p className="font-mono text-[12px] uppercase tracking-eyebrow text-oxblood">
         <span className="text-ink-faint">A five-stage arc · </span>
@@ -96,7 +96,7 @@ export default function Landing() {
           </p>
         </div>
         <div className="mb-10 flex items-baseline gap-6 border-b border-rule pb-4">
-          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-eyebrow text-ochre-deep">
             The Five Rooms
           </span>
           <h2 className="m-0 flex-1 font-display text-[28px] font-[380] tracking-[-0.01em]">
@@ -106,19 +106,23 @@ export default function Landing() {
 
         <ol className="space-y-12">
           {STAGES.map((stage) => (
-            <li key={stage.slug} className="grid grid-cols-[80px_1fr] gap-8">
+            <li
+              key={stage.slug}
+              className="grid grid-cols-[56px_1fr] gap-5 sm:grid-cols-[80px_1fr] sm:gap-8"
+            >
               <div>
-                <div className="font-mono text-[40px] font-[320] leading-none text-oxblood">
-                  {stage.num}
+                <div className="font-mono text-[32px] font-[320] leading-none text-oxblood sm:text-[40px]">
+                  <span aria-hidden="true">{stage.num}</span>
+                  <span className="sr-only">Stage {stage.num}</span>
                 </div>
               </div>
               <div>
-                <div className="flex items-baseline gap-3">
-                  <h3 className="m-0 font-display text-[26px] font-[380] tracking-[-0.01em]">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="m-0 font-display text-[22px] font-[380] tracking-[-0.01em] sm:text-[26px]">
                     {stage.state === "live" ? (
                       <Link
                         href={`/${stage.slug}`}
-                        className="transition-colors hover:text-oxblood"
+                        className="rounded-[2px] transition-colors hover:text-oxblood"
                       >
                         {stage.title}
                       </Link>
@@ -128,22 +132,23 @@ export default function Landing() {
                   </h3>
                   {stage.state === "coming-soon" && (
                     <span className="font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
-                      ─ in preparation
+                      <span aria-hidden="true">─ </span>in preparation
                     </span>
                   )}
                 </div>
-                <p className="mt-1 font-display text-[18px] italic text-ink-soft">
+                <p className="mt-1 font-display text-[17px] italic text-ink-soft sm:text-[18px]">
                   {stage.pitch}
                 </p>
-                <p className="mt-4 max-w-[640px] font-display text-[17px] font-[320] leading-[1.6] text-ink">
+                <p className="mt-4 max-w-[640px] font-display text-[16px] font-[320] leading-[1.6] text-ink sm:text-[17px]">
                   {stage.blurb}
                 </p>
                 {stage.state === "live" && (
                   <Link
                     href={`/${stage.slug}`}
-                    className="mt-5 inline-block font-mono text-[11px] uppercase tracking-eyebrow text-oxblood transition-colors hover:text-oxblood-deep"
+                    className="mt-5 inline-block rounded-[2px] font-mono text-[11px] uppercase tracking-eyebrow text-oxblood transition-colors hover:text-oxblood-deep"
+                    aria-label={`Enter Stage ${stage.num} — ${stage.title}`}
                   >
-                    Enter the room →
+                    Enter the room <span aria-hidden="true">→</span>
                   </Link>
                 )}
               </div>

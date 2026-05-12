@@ -50,6 +50,9 @@ export function WallOfIdentifiers() {
       if (!wall || !spec) return;
       const wRect = wall.getBoundingClientRect();
       const sRect = spec.getBoundingClientRect();
+      // If the wall is display:none (mobile breakpoint), skip — the visible
+      // list rendering doesn't need lines drawn.
+      if (wRect.width === 0 || wRect.height === 0) return;
       const sx = ((sRect.left + sRect.width / 2) - wRect.left) / wRect.width * 1000;
       const sy = ((sRect.top + sRect.height / 2) - wRect.top) / wRect.height * 520;
 
@@ -77,10 +80,62 @@ export function WallOfIdentifiers() {
   }, []);
 
   return (
-    <div
-      ref={wallRef}
-      className="relative h-[520px] overflow-hidden rounded-[2px] border border-paper-edge bg-paper-deep shadow-paper"
-    >
+    <>
+      {/* Mobile: accessible linear list. The wall below is visual flourish. */}
+      <div className="sm:hidden">
+        <div className="rounded-[2px] border border-paper-edge bg-paper-deep p-5 shadow-paper">
+          <div className="mb-4 text-center">
+            <div
+              className="mx-auto flex h-[88px] w-[88px] items-center justify-center rounded-full bg-ink font-display text-[32px] font-[360] italic text-paper"
+              style={{ boxShadow: "0 0 0 5px #ebe4d4, 0 0 0 6px #c9bfa5" }}
+              aria-hidden="true"
+            >
+              sk
+            </div>
+            <div className="mt-3 font-display text-[20px] font-[380]">
+              Stephen King
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-eyebrow text-ink-faint">
+              b. 1947 · Portland, ME
+            </div>
+          </div>
+          <ul
+            className="m-0 list-none space-y-2 p-0"
+            aria-label="Identifiers that reference Stephen King across national authorities"
+          >
+            {CHITS.map((c, i) => {
+              const isDisagree = DISAGREEMENT.has(i);
+              return (
+                <li
+                  key={i}
+                  className={
+                    "flex items-baseline justify-between gap-3 rounded-[2px] border border-paper-edge bg-paper px-3 py-2 " +
+                    (isDisagree ? "border-l-2 border-l-oxblood" : "")
+                  }
+                >
+                  <span className="font-mono text-[9px] font-medium uppercase tracking-eyebrow text-oxblood">
+                    {c.scheme}
+                    {isDisagree && (
+                      <span className="sr-only"> (disagreement)</span>
+                    )}
+                  </span>
+                  <span className="font-mono text-[11px] text-ink break-all text-right">
+                    {c.value}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+
+      {/* Desktop: the wall flourish */}
+      <div
+        ref={wallRef}
+        role="img"
+        aria-label="A visual wall of identifier scraps surrounding the name Stephen King, with thin dashed lines drawn from each scrap to the center. Two of the lines are rendered in red to indicate disagreement between catalogs."
+        className="relative hidden h-[520px] overflow-hidden rounded-[2px] border border-paper-edge bg-paper-deep shadow-paper sm:block"
+      >
       {/* graph paper grid */}
       <div
         aria-hidden
@@ -171,6 +226,7 @@ export function WallOfIdentifiers() {
           to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
