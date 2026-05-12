@@ -35,6 +35,14 @@ export const metadata: Metadata = {
     description:
       "How librarians solved identity, decades before Big Tech tried.",
     type: "website",
+    siteName: "The Authority Arc",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Authority Arc",
+    description:
+      "How librarians solved identity, decades before Big Tech tried.",
+    creator: "@systemslibrarian",
   },
   authors: [{ name: "Paul Clark", url: "https://systemslibrarian.dev" }],
 };
