@@ -36,23 +36,29 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   // Try several plausible endpoint shapes — WorldCat Entities has shipped
   // under multiple paths over its lifetime. We hit each and report what
   // came back so we can see which one the WSKey actually has access to.
-  // Try multiple hostnames — the WorldCat Entities API has lived under several
-  // domains over its lifetime and the docs are inconsistent. Whichever one
-  // returns a non-network error tells us the right base.
-  const hosts = [
-    "https://entity.api.oclc.org",
-    "https://entities.api.oclc.org",
-    "https://americas.metadata.api.oclc.org",
-    "https://americas.discovery.api.oclc.org",
+  const base = "https://entities.api.oclc.org";
+  const paths = [
+    "/entities",
+    "/entities/person",
+    `/entities/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
+    `/entities/person?q=${encodeURIComponent(`inScheme:viaf AND identifier:${viaf}`)}&limit=1`,
+    `/entities?type=person&q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
+    "/v1/entities",
+    `/v1/entities/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
+    "/data/entity",
+    "/data/entity/person",
+    `/data/entity/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
+    "/searchEntity",
+    `/searchEntity?type=person&q=${encodeURIComponent(`viafID:${viaf}`)}`,
+    "/wcentities",
+    `/wcentities/person?q=${encodeURIComponent(`viafID:${viaf}`)}`,
+    "/meridian",
+    "/meridian/person",
   ];
-  const attempts: { label: string; url: string }[] = [];
-  for (const h of hosts) {
-    attempts.push({ label: `${h} root`, url: `${h}/` });
-    attempts.push({
-      label: `${h} /data/person?q=viafID`,
-      url: `${h}/data/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
-    });
-  }
+  const attempts: { label: string; url: string }[] = paths.map((p) => ({
+    label: p,
+    url: `${base}${p}`,
+  }));
 
   const results: any[] = [];
   for (const a of attempts) {
