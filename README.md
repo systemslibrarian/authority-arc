@@ -248,18 +248,46 @@ npm run build
 npm start
 ```
 
-### Optional: OCLC WorldCat Entity Data integration
+### Optional: OCLC WorldCat Entity Data enrichment
 
-When the OCLC WSKey for the WorldCat Entity Data API is provisioned, set the following in `.env.local`:
+The resolver can attach a WorldCat entity URI and content fingerprint to any VIAF-resolved record. This is gravy, not a hard dependency — if OCLC is unreachable or has no matching entity, the resolver returns the VIAF result unchanged.
+
+Set the following in `.env.local`:
 
 ```env
 OCLC_CLIENT_ID=...
 OCLC_CLIENT_SECRET=...
 OCLC_TOKEN_URL=https://oauth.oclc.org/token
-OCLC_ENTITIES_BASE_URL=https://entitydata.api.oclc.org
+# Optional override; the default below is the correct production host.
+OCLC_ENTITY_BASE_URL=https://id.oclc.org/worldcat
+OCLC_SCOPES="publicEntities:read_brief_entities publicEntities:read_references"
 ```
 
-With those in place, `/api/resolve` will prefer OCLC PID Lookup over VIAF for entities OCLC knows about, the `entityMd5` field will populate on the resolver card, and Stage 3's Classify exhibit can hit live data for any ISBN/OCLC number rather than relying on the curated *It* fixture.
+The WSKey only needs the two `publicEntities:*` scopes — both are free-tier and available to any institution without an OCLC Meridian subscription.
+
+**How the bridge works.** OCLC's `GET /entity/{id}` endpoint takes an OCLC entity ID in the path, not a VIAF id, and the API that would resolve `viaf → entity-id` (PID Lookup) is paywalled behind Meridian. To stay on the free tier, `lib/oclc.ts` bridges through public data instead:
+
+```
+VIAF id ──Wikidata SPARQL: ?item wdt:P214 "<viaf>"; wdt:P10832 ?ocl ──▶ OCLC entity ID
+                                                                            │
+                                                                            ▼
+                            GET https://id.oclc.org/worldcat/entity/{id}    (publicEntities scope)
+                                                                            │
+                                                                            ▼
+                                                        WorldCat URI + ETag attached to record
+```
+
+Wikidata's `P10832` ("WorldCat Entities ID") is the join key; the SPARQL hop is unauthenticated and rate-limit-friendly. Coverage is uneven — well-known entities resolve, more obscure ones silently fall through to the unenriched VIAF record, which is the intended best-effort behavior.
+
+A diagnostic endpoint exposes each step:
+
+```bash
+# Walk the full bridge end-to-end
+curl 'http://localhost:3000/api/oclc-debug?viaf=27066711'
+
+# Skip the bridge, hit /entity/{id} directly
+curl 'http://localhost:3000/api/oclc-debug?id=E39PBJcGmbT4qdMwCHRrCypHG3'
+```
 
 ---
 

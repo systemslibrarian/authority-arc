@@ -11,23 +11,40 @@ import { lookupCurator } from "./curators";
  *      and `publicEntities:read_references` scopes, neither of which require
  *      end-user consent — server-to-server tokens are sufficient.
  *
- *   2. Provide a thin `oclcEnrichByViaf` helper that the resolver uses to attach
- *      a WorldCat Entity URI and its content fingerprint (entityMd5) to a
- *      resolved record. This is best-effort: if OCLC is unreachable, mis-
- *      configured, or has no matching entity, the resolver still returns the
- *      VIAF result unchanged.
+ *   2. Provide a thin `oclcEnrich` helper that the resolver uses to attach a
+ *      WorldCat Entity URI and its ETag fingerprint to a resolved record. This
+ *      is best-effort: if OCLC is unreachable, mis-configured, or has no
+ *      matching entity, the resolver still returns the VIAF result unchanged.
  *
  * Authorization Code + PKCE flow lives in app/api/auth/callback/route.ts. It
  * shares the same client id/secret but exchanges a user-supplied code instead
  * of using these client credentials directly.
+ *
+ * VIAF -> WorldCat bridge
+ * -----------------------
+ * Our WSKey scopes only unlock `GET https://id.oclc.org/worldcat/entity/{id}`,
+ * which takes an OCLC entity ID in the path. OCLC's own PID Lookup API (which
+ * would resolve VIAF -> entity ID) requires the `pidLookup` scope, gated by a
+ * paid Meridian subscription. We therefore bridge through public data:
+ *
+ *   VIAF cluster -> Wikidata Q-id (Wikidata property P214 == VIAF id)
+ *                -> WorldCat Entities ID (Wikidata property P10832)
+ *                -> GET /entity/{id}    (our scopes unlock this)
+ *
+ * Every hop uses a free public API: VIAF, Wikidata SPARQL, and the OCLC
+ * Entities Data endpoint with our existing scopes. No new scope required.
  */
 
 const TOKEN_URL = process.env.OCLC_TOKEN_URL ?? "https://oauth.oclc.org/token";
-const ENTITIES_BASE =
-  process.env.OCLC_ENTITIES_BASE_URL ?? "https://entity.api.oclc.org";
+const ENTITY_BASE =
+  process.env.OCLC_ENTITY_BASE_URL ?? "https://id.oclc.org/worldcat";
 const SCOPES =
   process.env.OCLC_SCOPES ??
   "publicEntities:read_brief_entities publicEntities:read_references";
+
+const SPARQL_URL = "https://query.wikidata.org/sparql";
+const USER_AGENT =
+  "AuthorityArc/1.0 (https://authority-arc.vercel.app; systemslibrarian@gmail.com)";
 
 /** Module-level token cache. Process-local; on Vercel each cold start re-mints. */
 let cachedToken: { value: string; expiresAt: number } | null = null;
@@ -45,7 +62,6 @@ export async function getOclcAccessToken(): Promise<string> {
   if (!oclcConfigured()) {
     throw new Error("OCLC credentials not configured");
   }
-  // Re-use the cached token until 30 seconds before its declared expiry.
   if (cachedToken && cachedToken.expiresAt - 30_000 > Date.now()) {
     return cachedToken.value;
   }
@@ -90,61 +106,121 @@ export async function getOclcAccessToken(): Promise<string> {
 }
 
 /**
- * Search the WorldCat Entities brief index for an entity carrying the given
- * VIAF id. Returns the first hit's normalized fields, or `null` when nothing
- * matches.
+ * Bridge: given a VIAF id, ask Wikidata for the matching entity's WorldCat
+ * Entities ID. Returns null if no Wikidata item carries that VIAF (P214) or
+ * if the item has no P10832 statement.
  *
- * The brief search endpoint accepts query parameters of the form
- * `?inLanguage=en&q=<lucene>` where `<lucene>` can match on external
- * identifiers via fields like `viafID`. We keep the call narrow (1 result)
- * to stay polite — this runs as an enrichment layer, not a primary lookup.
+ * Uses the public Wikidata SPARQL endpoint; no auth, just a User-Agent.
+ */
+export async function worldcatEntityIdFromViafViaWikidata(
+  viafId: string
+): Promise<{ wikidataId: string; worldcatEntityId: string } | null> {
+  const sparql = `
+    SELECT ?item ?ocl WHERE {
+      ?item wdt:P214 "${viafId.replace(/"/g, "")}" .
+      ?item wdt:P10832 ?ocl .
+    }
+    LIMIT 1
+  `;
+  const url = `${SPARQL_URL}?query=${encodeURIComponent(sparql)}&format=json`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/sparql-results+json",
+      "User-Agent": USER_AGENT,
+    },
+    signal: AbortSignal.timeout(10_000),
+    next: { revalidate: 3600 },
+  });
+  if (!response.ok) {
+    throw new Error(`Wikidata SPARQL returned ${response.status}`);
+  }
+  const json: any = await response.json();
+  const row = json?.results?.bindings?.[0];
+  const itemUri: string | undefined = row?.item?.value;
+  const ocl: string | undefined = row?.ocl?.value;
+  if (!itemUri || !ocl) return null;
+  const qidMatch = itemUri.match(/(Q\d+)$/);
+  if (!qidMatch) return null;
+  return { wikidataId: qidMatch[1], worldcatEntityId: ocl };
+}
+
+/**
+ * Fetch the brief WorldCat Entity record by its OCLC entity ID. Returns null
+ * on 404. Throws on other non-2xx responses so the caller can decide whether
+ * to swallow or log.
+ *
+ * Requires `publicEntities:read_brief_entities` (and optionally
+ * `publicEntities:read_references` for the `sameAs`/`relatedEntity` blocks).
+ */
+export async function oclcFetchEntity(
+  entityId: string
+): Promise<{
+  entityUri: string;
+  entityMd5?: string;
+  prefLabel?: string;
+  raw: unknown;
+} | null> {
+  const token = await getOclcAccessToken();
+  const url = `${ENTITY_BASE}/entity/${encodeURIComponent(entityId)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/ld+json",
+    },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`OCLC entity fetch returned ${response.status}`);
+  }
+  const json: any = await response.json();
+  // ETag is the closest thing to OCLC's `entityMd5` content fingerprint
+  // for this endpoint — it's stable per content version.
+  const etag = response.headers.get("etag")?.replace(/^W\//, "").replace(/"/g, "");
+  const entityUri =
+    typeof json?.["@id"] === "string"
+      ? json["@id"]
+      : `${ENTITY_BASE}/entity/${entityId}`;
+  // prefLabel can come back as either a plain string or a language map.
+  let prefLabel: string | undefined;
+  const pl = json?.prefLabel;
+  if (typeof pl === "string") prefLabel = pl;
+  else if (pl && typeof pl === "object") {
+    prefLabel =
+      (typeof pl.en === "string" && pl.en) ||
+      Object.values(pl).find((v): v is string => typeof v === "string");
+  }
+  return {
+    entityUri,
+    entityMd5: etag || undefined,
+    prefLabel,
+    raw: json,
+  };
+}
+
+/**
+ * Resolve a VIAF id all the way to a populated OCLC entity record by bridging
+ * through Wikidata. Returns null at any step where the bridge breaks
+ * (no Wikidata item with that VIAF, no P10832 statement, or OCLC 404).
  */
 export async function oclcLookupByViafId(viafId: string): Promise<{
   entityUri: string;
   entityMd5?: string;
   prefLabel?: string;
+  wikidataId?: string;
 } | null> {
-  const token = await getOclcAccessToken();
-  // The Entities API splits its index by entity type. For our resolver use
-  // case (people authority records) we target /data/person first; if that
-  // misses, callers can extend this with /data/organization etc.
-  const url = `${ENTITIES_BASE}/data/person?q=${encodeURIComponent(
-    `viafID:${viafId}`
-  )}&limit=1`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-    signal: AbortSignal.timeout(10_000),
-  });
-
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error(`OCLC entities search returned ${response.status}`);
-  }
-  const json: any = await response.json();
-  // The brief response is { totalResults, entities: [...] } in current docs.
-  const hit = Array.isArray(json?.entities) ? json.entities[0] : null;
+  const bridge = await worldcatEntityIdFromViafViaWikidata(viafId);
+  if (!bridge) return null;
+  const hit = await oclcFetchEntity(bridge.worldcatEntityId);
   if (!hit) return null;
-  const entityUri: string | undefined =
-    typeof hit?.id === "string" ? hit.id : typeof hit?.uri === "string" ? hit.uri : undefined;
-  if (!entityUri) return null;
-  const entityMd5: string | undefined =
-    typeof hit?.entityMd5 === "string"
-      ? hit.entityMd5
-      : typeof hit?.entityMD5 === "string"
-        ? hit.entityMD5
-        : undefined;
-  const prefLabel: string | undefined =
-    typeof hit?.prefLabel === "string"
-      ? hit.prefLabel
-      : typeof hit?.prefLabel?.["@value"] === "string"
-        ? hit.prefLabel["@value"]
-        : undefined;
-  return { entityUri, entityMd5, prefLabel };
+  return {
+    entityUri: hit.entityUri,
+    entityMd5: hit.entityMd5,
+    prefLabel: hit.prefLabel,
+    wikidataId: bridge.wikidataId,
+  };
 }
 
 /**
@@ -157,7 +233,6 @@ export async function oclcLookupByViafId(viafId: string): Promise<{
  */
 export async function oclcEnrich(record: ResolvedEntity): Promise<ResolvedEntity> {
   if (!oclcConfigured()) return record;
-  // Only attempt enrichment when we have a VIAF id to search by.
   const viafIdMatch = record.canonicalUri.match(/viaf\.org\/viaf\/(\d+)/i);
   if (!viafIdMatch) return record;
   try {
@@ -169,7 +244,6 @@ export async function oclcEnrich(record: ResolvedEntity): Promise<ResolvedEntity
       id: hit.entityUri,
       uri: hit.entityUri,
     };
-    // Avoid duplicating an existing WORLDCAT entry.
     const sameAs = record.sameAs.some(
       (s) => s.curator.toUpperCase() === "WORLDCAT" && s.id === hit.entityUri
     )

@@ -1,30 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOclcAccessToken, oclcConfigured } from "@/lib/oclc";
+import {
+  getOclcAccessToken,
+  oclcConfigured,
+  oclcFetchEntity,
+  worldcatEntityIdFromViafViaWikidata,
+} from "@/lib/oclc";
 
 /**
- * GET /api/oclc-debug?viaf=27066711
+ * GET /api/oclc-debug?viaf=27066711      walk the full VIAF -> WD -> OCLC chain
+ * GET /api/oclc-debug?id=E39PBJcGmbT4qdMwCHRrCypHG3   skip the bridge, hit /entity/{id} directly
  *
- * TEMPORARY diagnostic endpoint. Walks the OCLC integration step-by-step
- * and returns whatever upstream actually said, so we can see why the silent
- * enrichment path is returning nothing. Delete this route once the
- * integration is verified.
+ * Diagnostic endpoint. Our WSKey only carries the publicEntities scopes, which
+ * means we can only call `GET https://id.oclc.org/worldcat/entity/{id}`. To go
+ * from a VIAF id to an OCLC entity id we bridge via Wikidata's P10832
+ * statement (free, no auth). This route exposes each step so we can see
+ * exactly where the chain breaks when a record fails to enrich.
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const viaf = req.nextUrl.searchParams.get("viaf") ?? "27066711";
+  const viaf = req.nextUrl.searchParams.get("viaf");
+  const directId = req.nextUrl.searchParams.get("id");
+
   const out: Record<string, unknown> = {
     configured: oclcConfigured(),
     env: {
       tokenUrl: process.env.OCLC_TOKEN_URL ?? null,
-      entitiesBase: process.env.OCLC_ENTITIES_BASE_URL ?? null,
+      entityBase: process.env.OCLC_ENTITY_BASE_URL ?? null,
       scopes: process.env.OCLC_SCOPES ?? null,
       hasClientId: Boolean(process.env.OCLC_CLIENT_ID),
       hasClientSecret: Boolean(process.env.OCLC_CLIENT_SECRET),
     },
+    input: { viaf, id: directId },
   };
 
-  let token: string;
   try {
-    token = await getOclcAccessToken();
+    const token = await getOclcAccessToken();
     out.tokenAcquired = true;
     out.tokenPreview = `${token.slice(0, 8)}…${token.slice(-4)}`;
   } catch (err: any) {
@@ -33,56 +42,31 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json(out, { status: 200 });
   }
 
-  // Try several plausible endpoint shapes — WorldCat Entities has shipped
-  // under multiple paths over its lifetime. We hit each and report what
-  // came back so we can see which one the WSKey actually has access to.
-  const base = "https://entities.api.oclc.org";
-  const paths = [
-    "/entities",
-    "/entities/person",
-    `/entities/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
-    `/entities/person?q=${encodeURIComponent(`inScheme:viaf AND identifier:${viaf}`)}&limit=1`,
-    `/entities?type=person&q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
-    "/v1/entities",
-    `/v1/entities/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
-    "/data/entity",
-    "/data/entity/person",
-    `/data/entity/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
-    "/searchEntity",
-    `/searchEntity?type=person&q=${encodeURIComponent(`viafID:${viaf}`)}`,
-    "/wcentities",
-    `/wcentities/person?q=${encodeURIComponent(`viafID:${viaf}`)}`,
-    "/meridian",
-    "/meridian/person",
-  ];
-  const attempts: { label: string; url: string }[] = paths.map((p) => ({
-    label: p,
-    url: `${base}${p}`,
-  }));
+  let oclcId = directId;
 
-  const results: any[] = [];
-  for (const a of attempts) {
+  if (!oclcId && viaf) {
     try {
-      const r = await fetch(a.url, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-        signal: AbortSignal.timeout(10_000),
-      });
-      const text = await r.text();
-      results.push({
-        label: a.label,
-        url: a.url,
-        status: r.status,
-        body: text.slice(0, 600),
-      });
+      const bridge = await worldcatEntityIdFromViafViaWikidata(viaf);
+      out.bridge = bridge ?? { found: false, note: "no Wikidata item with P214==viaf AND P10832 set" };
+      oclcId = bridge?.worldcatEntityId ?? null;
     } catch (err: any) {
-      results.push({
-        label: a.label,
-        url: a.url,
-        error: String(err?.message ?? err),
-      });
+      out.bridge = { error: String(err?.message ?? err) };
     }
   }
-  out.attempts = results;
+
+  if (!oclcId) {
+    if (!viaf && !directId) {
+      out.error = "pass ?viaf=<viafID> or ?id=<oclc-entity-id>";
+    }
+    return NextResponse.json(out, { status: 200 });
+  }
+
+  try {
+    const hit = await oclcFetchEntity(oclcId);
+    out.entity = hit ?? { found: false, oclcId };
+  } catch (err: any) {
+    out.entity = { error: String(err?.message ?? err), oclcId };
+  }
+
   return NextResponse.json(out, { status: 200 });
 }
