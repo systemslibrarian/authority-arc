@@ -36,31 +36,23 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   // Try several plausible endpoint shapes — WorldCat Entities has shipped
   // under multiple paths over its lifetime. We hit each and report what
   // came back so we can see which one the WSKey actually has access to.
-  const base = process.env.OCLC_ENTITIES_BASE_URL ?? "https://entity.api.oclc.org";
-  const attempts = [
-    {
-      label: "person?q=viafID:N",
-      url: `${base}/data/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
-    },
-    {
-      label: "person?q=identifier",
-      url: `${base}/data/person?q=${encodeURIComponent(
-        `identifiers:"http://viaf.org/viaf/${viaf}"`
-      )}&limit=1`,
-    },
-    {
-      label: "person/search?viafID",
-      url: `${base}/data/person/search?viafID=${encodeURIComponent(viaf)}&limit=1`,
-    },
-    {
-      label: "browse?q=viafID",
-      url: `${base}/data/person/browse?q=${encodeURIComponent(`viafID:${viaf}`)}`,
-    },
-    {
-      label: "root catalog probe",
-      url: `${base}/data`,
-    },
+  // Try multiple hostnames — the WorldCat Entities API has lived under several
+  // domains over its lifetime and the docs are inconsistent. Whichever one
+  // returns a non-network error tells us the right base.
+  const hosts = [
+    "https://entity.api.oclc.org",
+    "https://entities.api.oclc.org",
+    "https://americas.metadata.api.oclc.org",
+    "https://americas.discovery.api.oclc.org",
   ];
+  const attempts: { label: string; url: string }[] = [];
+  for (const h of hosts) {
+    attempts.push({ label: `${h} root`, url: `${h}/` });
+    attempts.push({
+      label: `${h} /data/person?q=viafID`,
+      url: `${h}/data/person?q=${encodeURIComponent(`viafID:${viaf}`)}&limit=1`,
+    });
+  }
 
   const results: any[] = [];
   for (const a of attempts) {
