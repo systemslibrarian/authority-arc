@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { viafLookup } from "@/lib/viaf";
+import { oclcEnrich } from "@/lib/oclc";
 import { fixtureLookup } from "@/lib/fixtures";
 import type { ResolveError, ResolvedEntity } from "@/lib/types";
 
@@ -44,7 +45,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Fixture-only mode (tests, deterministic demos).
   if (prefer === "fixture") {
     const fixture = fixtureLookup({ curator, id });
-    if (fixture) return NextResponse.json(fixture satisfies ResolvedEntity);
+    if (fixture) {
+      const enriched = await oclcEnrich(fixture);
+      return NextResponse.json(enriched satisfies ResolvedEntity);
+    }
     return errorResponse({
       error: true,
       status: 404,
@@ -53,15 +57,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
   }
 
-  // Default: VIAF live, fixture fallback.
+  // Default: VIAF live, fixture fallback. WorldCat Entities runs as a
+  // best-effort enrichment on top of the VIAF result; failures there are
+  // swallowed inside oclcEnrich and never poison the response.
   try {
     const resolved = await viafLookup({ curator, id });
-    return NextResponse.json(resolved);
+    const enriched = await oclcEnrich(resolved);
+    return NextResponse.json(enriched);
   } catch (err: any) {
     // 404 from VIAF → try fixtures before giving up.
     if (err?.code === "NOT_FOUND") {
       const fixture = fixtureLookup({ curator, id });
-      if (fixture) return NextResponse.json(fixture satisfies ResolvedEntity);
+      if (fixture) {
+        const enriched = await oclcEnrich(fixture);
+        return NextResponse.json(enriched satisfies ResolvedEntity);
+      }
       return errorResponse({
         error: true,
         status: 404,
@@ -72,7 +82,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Upstream failure or timeout → also try fixtures.
     const fixture = fixtureLookup({ curator, id });
     if (fixture) {
-      return NextResponse.json(fixture satisfies ResolvedEntity);
+      const enriched = await oclcEnrich(fixture);
+      return NextResponse.json(enriched satisfies ResolvedEntity);
     }
     return errorResponse({
       error: true,
